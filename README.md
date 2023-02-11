@@ -4,9 +4,13 @@ Explores several messaging solutions with Spring-Boot.
 
 ## Local development
 
+<b>Note!</b> Kafka UI available on localhost:8081.
+
 ```
 docker-compose up -d
 ./gradlew bootRun
+curl -X GET localhost:8080/ping
+curl -X POST localhost:8080/products -H "Content-Type: text/plai" -d 'Hello Kafka topic!'
 ```
 
 ## Build & test

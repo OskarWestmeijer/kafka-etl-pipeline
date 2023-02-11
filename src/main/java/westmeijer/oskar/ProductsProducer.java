@@ -20,7 +20,7 @@ public class ProductsProducer {
 
     public void sendMessage(String message) {
         Objects.requireNonNull(message);
-        log.info("Sending message: {} , to topic: {}", productsTopic, message);
+        log.info("Producing to topic: {}, message: {}", productsTopic, message);
         kafkaTemplate.send(productsTopic, message);
     }
 

@@ -9,4 +9,4 @@ spring:
 
 products-consumers:
   topic-name: products
-  messages-per-request: 1
+  group-id: 1234
