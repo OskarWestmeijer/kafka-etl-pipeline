@@ -26,26 +26,12 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  kafka-init-topics:
-    image: confluentinc/cp-kafka:7.2.1
-    volumes:
-      - ./src/test/resources/message.json:/data/message.json
-    depends_on:
-      - kafka
-    # cub kafka-ready checks if expected_brokers: 1 is ready with timeout 60s.
-    # kafka-topics
-    command: "bash -c 'echo Waiting for Kafka to be ready... && \
-               cub kafka-ready --bootstrap_broker_list kafka:29092 1 20 && \
-               kafka-topics --create --topic products --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka:29092 && \
-               kafka-console-producer --bootstrap-server kafka:29092 --topic products --property value.serializer=custom.class.serialization.JsonSerializer < /data/message.json'"
-
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     ports:
       - "8081:8080"
     depends_on:
       - kafka
-      - kafka-init-topics
     environment:
       KAFKA_CLUSTERS_0_NAME: products_cluster
       # Address where to connect
