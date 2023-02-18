@@ -1,16 +1,14 @@
 package westmeijer.oskar;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @AllArgsConstructor
-@Validated
 @RestController
 public class ProductsController {
 
@@ -23,7 +21,7 @@ public class ProductsController {
     }
 
     @PostMapping("/products")
-    public ResponseEntity<String> addProduct(@NotBlank @RequestBody String product) {
+    public ResponseEntity<Product> addProduct(@Valid @RequestBody Product product) {
         log.info("Receive POST request with body: {}", product);
         productsProducer.sendMessage(product);
         return new ResponseEntity<>(product, HttpStatus.CREATED);

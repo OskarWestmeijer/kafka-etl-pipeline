@@ -16,12 +16,12 @@ public class ProductsProducer {
     private String productsTopic;
 
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private KafkaTemplate<String, Product> productKafkaTemplate;
 
-    public void sendMessage(String message) {
+    public void sendMessage(Product message) {
         Objects.requireNonNull(message);
         log.info("Producing to topic: {}, message: {}", productsTopic, message);
-        kafkaTemplate.send(productsTopic, message);
+        productKafkaTemplate.send(productsTopic, message);
     }
 
 }
