@@ -10,3 +10,9 @@ spring:
 products-consumers:
   topic-name: products
   group-id: 1234
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health, info, prometheus"

@@ -36,3 +36,10 @@ services:
       KAFKA_CLUSTERS_0_NAME: products_cluster
       # Address where to connect
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+
+  prometheus:
+    image: prom/prometheus:v2.42.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
