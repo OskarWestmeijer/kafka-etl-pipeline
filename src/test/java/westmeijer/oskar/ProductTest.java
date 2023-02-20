@@ -7,6 +7,7 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,16 +35,24 @@ public class ProductTest {
 
     @Test
     public void idIsNull() {
-        NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
-            Product p = new Product(null, "Effective Java");
-        });
+        Product p = new Product(null, "Effective Java");
+
+        Set<ConstraintViolation<Product>> violations = validator.validate(p);
+
+        assertEquals(1, violations.size());
     }
 
     @Test
     public void nameIsNull() {
-        NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
-            Product p = new Product(12, null);
-        });
+        Product p = new Product(123, null);
+        Set<ConstraintViolation<Product>> violations = validator.validate(p);
+        List<String> messages = violations.stream()
+                .map(ConstraintViolation::getMessage)
+                .toList();
+
+        assertEquals(2, violations.size());
+        assertTrue(messages.contains("Name cannot be null."));
+        assertTrue(messages.contains("Name cannot be empty."));
     }
 
 
