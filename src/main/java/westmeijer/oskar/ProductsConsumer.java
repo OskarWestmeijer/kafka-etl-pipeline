@@ -1,6 +1,8 @@
 package westmeijer.oskar;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.validation.Validator;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -13,19 +15,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductsConsumer {
 
-    private Product latestMsg;
+  @Getter
+  private Product latestMsg;
 
-    private final MeterRegistry meterRegistry;
+  private final Validator validator;
 
+  private final MeterRegistry meterRegistry;
 
-    @KafkaListener(topics = "${products-consumers.topic-name}")
-    public void listenToProducts(@Payload ConsumerRecord<String, Product> message) {
-        log.info("Consuming from products topic, message: {}", message);
-        latestMsg = message.value();
-        meterRegistry.counter("products.consumed").increment();
+  @KafkaListener(topics = "${products-consumers.topic-name}")
+  public void listenToProducts(ConsumerRecord<String, Product> message) {
+    log.info("Received message from products topic. key: {}, value: {}, message: {}", message.key(), message.value(), message);
+    var validationErrors = validator.validate(message.value());
+    if (!validationErrors.isEmpty()) {
+      log.error("Message had validation errors! errors: {}", validationErrors);
     }
 
-    public Product getLatestMsg() {
-        return latestMsg;
-    }
+    latestMsg = message.value();
+    meterRegistry.counter("products.consumed").increment();
+  }
+
 }

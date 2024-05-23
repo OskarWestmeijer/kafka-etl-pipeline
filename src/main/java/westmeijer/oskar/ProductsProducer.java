@@ -12,16 +12,16 @@ import java.util.Objects;
 @Component
 public class ProductsProducer {
 
-    @Value(value = "${products-consumers.topic-name}")
-    private String productsTopic;
+  @Value(value = "${products-consumers.topic-name}")
+  private String productsTopic;
 
-    @Autowired
-    private KafkaTemplate<String, Product> productKafkaTemplate;
+  @Autowired
+  private KafkaTemplate<String, Product> productKafkaTemplate;
 
-    public void sendMessage(Product message) {
-        Objects.requireNonNull(message);
-        log.info("Producing to topic: {}, message: {}", productsTopic, message);
-        productKafkaTemplate.send(productsTopic, message);
-    }
+  public void sendMessage(Product product) {
+    Objects.requireNonNull(product);
+    log.info("Producing to topic: {}, message: {}", productsTopic, product);
+    productKafkaTemplate.send(productsTopic, String.valueOf(product.id()), product);
+  }
 
 }

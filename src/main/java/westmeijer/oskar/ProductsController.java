@@ -21,7 +21,7 @@ public class ProductsController {
     }
 
     @PostMapping("/products")
-    public ResponseEntity<Product> addProduct(@Valid @RequestBody Product product) {
+    public ResponseEntity<Product> addProduct(@RequestBody Product product) {
         log.info("Receive POST request with body: {}", product);
         productsProducer.sendMessage(product);
         return new ResponseEntity<>(product, HttpStatus.CREATED);
