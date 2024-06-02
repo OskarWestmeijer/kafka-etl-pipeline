@@ -2,26 +2,16 @@ spring:
   jackson:
     deserialization:
       FAIL_ON_UNKNOWN_PROPERTIES: off
-  kafka:
-    consumer:
-      group-id: products-consumers
-      auto-offset-reset: earliest
-      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-    properties:
-      spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
-      spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
 
-      #stops complaining about product class
-      spring.json.trusted.packages: westmeijer.oskar
-
-    # change this property if you are using your own
-    # Kafka cluster or your Docker IP is different
-    bootstrap-servers: localhost:9092
-
-products-consumers:
-  topic-name: products
-  group-id: 1234
+# custom kafka properties
+kafka:
+  servers:
+    products:
+      bootstrap-server: localhost:9092
+      consumers:
+        products-consumers:
+          topic-name: products
+          group-id: 1234
 
 management:
   endpoints:

@@ -12,7 +12,7 @@ import java.util.Objects;
 @Component
 public class ProductsProducer {
 
-  @Value(value = "${products-consumers.topic-name}")
+  @Value(value = "${kafka.servers.products.consumers.products-consumers.topic-name}")
   private String productsTopic;
 
   @Autowired

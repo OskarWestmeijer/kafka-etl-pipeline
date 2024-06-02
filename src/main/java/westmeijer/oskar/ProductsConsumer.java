@@ -22,12 +22,13 @@ public class ProductsConsumer {
 
   private final MeterRegistry meterRegistry;
 
-  @KafkaListener(topics = "${products-consumers.topic-name}")
+  @KafkaListener(topics = "${kafka.servers.products.consumers.products-consumers.topic-name}")
   public void listenToProducts(ConsumerRecord<String, Product> message) {
     log.info("Received message from products topic. key: {}, value: {}, message: {}", message.key(), message.value(), message);
     var validationErrors = validator.validate(message.value());
     if (!validationErrors.isEmpty()) {
       log.error("Message had validation errors! errors: {}", validationErrors);
+      throw new IllegalArgumentException(validationErrors.toString());
     }
 
     latestMsg = message.value();
