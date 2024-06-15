@@ -1,26 +1,46 @@
-# kafka-messaging-sample
+# kafka-messaging
+
+![main branch](https://github.com/OskarWestmeijer/kafka-messaging/actions/workflows/main-build-test-release.yml/badge.svg)
 
 Explores Kafka messaging with Spring-Boot.
 
-## Build & test
+### Technologies
 
 ```
+Java, Gradle & Spring-Boot
+Kafka & Cloud-Events
+Github Actions
+```
+
+### Build & test
+
+``` bash
 ./gradlew clean check
 ```
 
-## Local development
+### Local development
 
-```
+``` bash
 docker-compose up -d
 ./gradlew bootRun
+```
 
-# check availability
+### Prepared requests
+
+Verify application is available.
+
+``` bash
 curl -X GET localhost:8080/ping
+```
 
-# produce message
+Publish message.
+
+``` bash
 curl -X POST localhost:8080/products -H "Content-Type: application/json" -d '{"id":1234,"name":"Effective Java"}'
 ```
 
-- [local Kafka UI](http://localhost:8081)
-- [local Prometheus UI](http://localhost:9090)
+### Monitoring
+
+- [Kafka UI](http://localhost:8081)
+- [Prometheus UI](http://localhost:9090)
 
