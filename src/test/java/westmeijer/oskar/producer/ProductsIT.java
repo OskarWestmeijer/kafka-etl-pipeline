@@ -1,4 +1,4 @@
-package westmeijer.oskar;
+package westmeijer.oskar.producer;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,20 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
-import westmeijer.oskar.consumer.ProductsCEStructuredConsumer;
+import westmeijer.oskar.consumer.ProductsConsumer;
 import westmeijer.oskar.model.Product;
-import westmeijer.oskar.producer.ProductsCEStructuredProducer;
 
 @SpringBootTest
 @DirtiesContext
 @EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
-public class ProductsCEStructuredIT {
+public class ProductsIT {
 
   @Autowired
-  private ProductsCEStructuredProducer producer;
+  private ProductsProducer producer;
 
   @Autowired
-  private ProductsCEStructuredConsumer consumer;
+  private ProductsConsumer consumer;
 
   @Autowired
   private MeterRegistry meterRegistry;
@@ -32,8 +31,8 @@ public class ProductsCEStructuredIT {
   @BeforeEach
   public void init() {
     meterRegistry.clear();
+    consumer.clearLastMessage();
   }
-
 
   @Test
   void shouldProduceAndConsumeMessage() {
@@ -43,7 +42,7 @@ public class ProductsCEStructuredIT {
 
     await().atMost(Durations.TEN_SECONDS).untilAsserted(() -> {
       assertEquals(p, consumer.getLatestMsg());
-      assertEquals(1d, meterRegistry.get("products-ce-structured.consumed").counter().count());
+      assertEquals(1d, meterRegistry.get("products.consumed").counter().count());
     });
   }
 

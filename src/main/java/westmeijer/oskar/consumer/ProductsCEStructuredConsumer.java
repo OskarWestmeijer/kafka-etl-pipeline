@@ -39,7 +39,6 @@ public class ProductsCEStructuredConsumer {
     PojoCloudEventData<Product> deserializedData = CloudEventUtils
         .mapData(message.value(), PojoCloudEventDataMapper.from(objectMapper, Product.class));
 
-    latestMsg = deserializedData.getValue();
     Instant ceTime = message.value().getTime().toInstant();
     log.info("Deserialized structuredCE. value: {}, ce_time: {}", latestMsg, ceTime);
 
@@ -49,7 +48,12 @@ public class ProductsCEStructuredConsumer {
       throw new IllegalArgumentException(validationErrors.toString());
     }
 
+    latestMsg = deserializedData.getValue();
     meterRegistry.counter("products-ce-structured.consumed").increment();
+  }
+
+  public void clearLastMessage() {
+    latestMsg = null;
   }
 
 }

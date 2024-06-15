@@ -36,4 +36,8 @@ public class ProductsConsumer {
     meterRegistry.counter("products.consumed").increment();
   }
 
+  public void clearLastMessage() {
+    latestMsg = null;
+  }
+
 }
