@@ -9,6 +9,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/backend-build-and-test
+        with:
+          code-cov: ${{ secrets.CODECOV_TOKEN }}
 
   dependabot-automerge:
     needs: [ backend-build-and-test ]

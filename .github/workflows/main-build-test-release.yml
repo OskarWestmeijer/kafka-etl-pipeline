@@ -11,3 +11,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/backend-build-and-test
+        with:
+          code-cov: ${{ secrets.CODECOV_TOKEN }}
