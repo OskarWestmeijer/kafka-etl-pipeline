@@ -41,7 +41,7 @@ public class ProductsConfig {
   }
 
   @Bean
-  ConcurrentKafkaListenerContainerFactory<String, Product> productsListenerContainerFactory(CommonErrorHandler commonErrorHandler) {
+  ConcurrentKafkaListenerContainerFactory<String, Product> productsContainerFactory(CommonErrorHandler commonErrorHandler) {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, Product>();
     factory.setConsumerFactory(productsConsumerFactory());
     factory.setCommonErrorHandler(commonErrorHandler);
