@@ -1,5 +1,7 @@
 package westmeijer.oskar.consumer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cloudevents.CloudEvent;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Validator;
 import lombok.Getter;
@@ -20,10 +22,12 @@ public class ProductsCEStructuredConsumer {
 
   private final Validator validator;
 
+  private final ObjectMapper objectMapper;
+
   private final MeterRegistry meterRegistry;
 
   @KafkaListener(topics = "${kafka.servers.products.consumers.products-ce-structured.topic-name}")
-  public void listenToCEStructuredProducts(ConsumerRecord<String, Product> message) {
+  public void listenToCEStructuredProducts(ConsumerRecord<String, CloudEvent> message) {
     log.info("Received message from products-ce-structured topic. key: {}, value: {}, message: {}", message.key(), message.value(),
         message);
     var validationErrors = validator.validate(message.value());
@@ -32,7 +36,8 @@ public class ProductsCEStructuredConsumer {
       throw new IllegalArgumentException(validationErrors.toString());
     }
 
-    latestMsg = message.value();
+    var productCE = message.value();
+    log.info("Received cloud event: {}", productCE);
     meterRegistry.counter("products-ce-structured.consumed").increment();
   }
 
