@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.SneakyThrows;
 import org.awaitility.Durations;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ public class ProductsControllerIT {
   private ProductsCEStructuredConsumer productsCEStructuredConsumer;
 
   @BeforeEach
+  @AfterEach
   public void init() {
     meterRegistry.clear();
     productsConsumer.clearLastMessage();
