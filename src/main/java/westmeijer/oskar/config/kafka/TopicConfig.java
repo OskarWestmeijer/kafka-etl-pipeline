@@ -1,4 +1,4 @@
-package westmeijer.oskar.config;
+package westmeijer.oskar.config.kafka;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,13 +11,16 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdmin;
 
 @Configuration
-public class KafkaTopicConfig {
+public class TopicConfig {
 
   @Value(value = "${kafka.servers.products.bootstrap-server}")
   private String bootstrapAddress;
 
-  @Value(value = "${kafka.servers.products.consumers.products-consumers.topic-name}")
+  @Value(value = "${kafka.servers.products.consumers.products.topic-name}")
   private String productsTopic;
+
+  @Value(value = "${kafka.servers.products.consumers.products-ce-structured.topic-name}")
+  private String productsCEStructuredTopic;
 
   @Bean
   public KafkaAdmin kafkaAdmin() {
@@ -29,6 +32,14 @@ public class KafkaTopicConfig {
   @Bean
   public NewTopic productsTopic() {
     return TopicBuilder.name(productsTopic)
+        .partitions(3)
+        .replicas(1)
+        .build();
+  }
+
+  @Bean
+  public NewTopic productsCEStructuredTopic() {
+    return TopicBuilder.name(productsCEStructuredTopic)
         .partitions(3)
         .replicas(1)
         .build();

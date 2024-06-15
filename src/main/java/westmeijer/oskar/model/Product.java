@@ -1,4 +1,4 @@
-package westmeijer.oskar;
+package westmeijer.oskar.model;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

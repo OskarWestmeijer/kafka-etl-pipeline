@@ -9,8 +9,11 @@ kafka:
     products:
       bootstrap-server: localhost:9092
       consumers:
-        products-consumers:
+        products:
           topic-name: products
+          group-id: 1234
+        products-ce-structured:
+          topic-name: products-ce-structured
           group-id: 1234
 
 management:

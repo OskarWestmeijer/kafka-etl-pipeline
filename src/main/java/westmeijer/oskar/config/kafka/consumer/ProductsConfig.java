@@ -1,4 +1,4 @@
-package westmeijer.oskar.config;
+package westmeijer.oskar.config.kafka.consumer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,20 +13,20 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
-import westmeijer.oskar.Product;
+import westmeijer.oskar.model.Product;
 
 @Slf4j
 @Configuration
-public class KafkaConsumerConfig {
+public class ProductsConfig {
 
   @Value(value = "${kafka.servers.products.bootstrap-server}")
   private String bootstrapAddress;
 
-  @Value(value = "${kafka.servers.products.consumers.products-consumers.group-id}")
+  @Value(value = "${kafka.servers.products.consumers.products.group-id}")
   private String groupId;
 
   @Bean
-  ConsumerFactory<String, Product> consumerFactory() {
+  ConsumerFactory<String, Product> productsConsumerFactory() {
     Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -41,18 +41,9 @@ public class KafkaConsumerConfig {
   }
 
   @Bean
-  CommonErrorHandler commonErrorHandler() {
-    return new KafkaErrorHandler();
-  }
-
-  @Bean
-  ConcurrentKafkaListenerContainerFactory<String, Product> kafkaListenerContainerFactory(
-      ConsumerFactory<String, Product> consumerFactory,
-      CommonErrorHandler commonErrorHandler
-
-  ) {
+  ConcurrentKafkaListenerContainerFactory<String, Product> productsListenerContainerFactory(CommonErrorHandler commonErrorHandler) {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, Product>();
-    factory.setConsumerFactory(consumerFactory());
+    factory.setConsumerFactory(productsConsumerFactory());
     factory.setCommonErrorHandler(commonErrorHandler);
     return factory;
   }

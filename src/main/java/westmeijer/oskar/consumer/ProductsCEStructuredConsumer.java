@@ -1,4 +1,4 @@
-package westmeijer.oskar;
+package westmeijer.oskar.consumer;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Validator;
@@ -7,13 +7,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import westmeijer.oskar.model.Product;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class ProductsConsumer {
+public class ProductsCEStructuredConsumer {
 
   @Getter
   private Product latestMsg;
@@ -22,9 +22,10 @@ public class ProductsConsumer {
 
   private final MeterRegistry meterRegistry;
 
-  @KafkaListener(topics = "${kafka.servers.products.consumers.products-consumers.topic-name}")
-  public void listenToProducts(ConsumerRecord<String, Product> message) {
-    log.info("Received message from products topic. key: {}, value: {}, message: {}", message.key(), message.value(), message);
+  @KafkaListener(topics = "${kafka.servers.products.consumers.products-ce-structured.topic-name}")
+  public void listenToCEStructuredProducts(ConsumerRecord<String, Product> message) {
+    log.info("Received message from products-ce-structured topic. key: {}, value: {}, message: {}", message.key(), message.value(),
+        message);
     var validationErrors = validator.validate(message.value());
     if (!validationErrors.isEmpty()) {
       log.error("Message had validation errors! errors: {}", validationErrors);
@@ -32,7 +33,7 @@ public class ProductsConsumer {
     }
 
     latestMsg = message.value();
-    meterRegistry.counter("products.consumed").increment();
+    meterRegistry.counter("products-ce-structured.consumed").increment();
   }
 
 }

@@ -1,4 +1,4 @@
-package westmeijer.oskar.config;
+package westmeijer.oskar.config.kafka;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -7,7 +7,7 @@ import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.kafka.listener.MessageListenerContainer;
 
 @Slf4j
-public class KafkaErrorHandler implements CommonErrorHandler {
+public class KafkaErrorHandlerImpl implements CommonErrorHandler {
 
   @Override
   public boolean handleOne(Exception exception, ConsumerRecord<?, ?> record, Consumer<?, ?> consumer, MessageListenerContainer container) {

@@ -11,11 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
+import westmeijer.oskar.consumer.ProductsConsumer;
+import westmeijer.oskar.model.Product;
+import westmeijer.oskar.producer.ProductsProducer;
 
 @SpringBootTest
 @DirtiesContext
 @EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
-public class EmbeddedKafkaIntegrationTest {
+public class ProductsIT {
 
   @Autowired
   private ProductsProducer producer;
@@ -33,7 +36,7 @@ public class EmbeddedKafkaIntegrationTest {
 
 
   @Test
-  public void testKafka() {
+  void shouldProduceAndConsumeMessage() {
     Product p = new Product(1234, "System Design Interview");
 
     producer.sendMessage(p);
