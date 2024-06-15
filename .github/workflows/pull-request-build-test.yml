@@ -11,7 +11,7 @@ jobs:
       - uses: ./.github/actions/backend-build-and-test
 
   dependabot-automerge:
-    needs: [ backend-build-and-test, frontend-build-and-test, codeql-check ]
+    needs: [ backend-build-and-test ]
     runs-on: ubuntu-latest
     environment: oskar-westmeijer-environment
     if: ${{ github.actor == 'dependabot[bot]' }}
