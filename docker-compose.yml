@@ -1,7 +1,7 @@
 services:
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.2.1
+    image: confluentinc/cp-zookeeper:7.6.1
     container_name: zookeeper
     ports:
       - "2181:2181"
@@ -10,7 +10,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    image: confluentinc/cp-kafka:7.2.1
+    image: confluentinc/cp-kafka:7.6.1
     container_name: kafka
     depends_on:
       - zookeeper
@@ -27,7 +27,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   kafka-ui:
-    image: provectuslabs/kafka-ui:latest
+    image: ghcr.io/kafbat/kafka-ui:v1.0.0
     container_name: kafka-ui
     ports:
       - "8081:8080"
