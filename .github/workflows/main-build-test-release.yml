@@ -1,0 +1,13 @@
+name: main-build-test-release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  backend-build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/backend-build-and-test
