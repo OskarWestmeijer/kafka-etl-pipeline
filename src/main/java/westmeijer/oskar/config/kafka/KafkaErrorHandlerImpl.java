@@ -31,14 +31,16 @@ public class KafkaErrorHandlerImpl implements CommonErrorHandler {
   private boolean handle(Exception exception, ConsumerRecord<?, ?> record, Consumer<?, ?> consumer) {
     var key = record != null ? record.key() : null;
     var value = record != null ? record.value() : null;
-    log.error("Exception thrown on consumption. Seek offset +1. key: {}, value: {}", key, value, exception);
     meterRegistry.counter("consumption.error").increment();
 
     if (exception instanceof RecordDeserializationException) {
+      log.error("Exception thrown on consumption. Seek offset +1. key: {}, value: {}", key, value, exception);
       RecordDeserializationException rde = (RecordDeserializationException) exception;
       consumer.seek(rde.topicPartition(), rde.offset() + 1L);
       consumer.commitSync();
+      return true;
     }
+    log.error("Exception thrown on consumption, not seeking offset. key: {}, value: {}", key, value, exception);
     return true;
   }
 
