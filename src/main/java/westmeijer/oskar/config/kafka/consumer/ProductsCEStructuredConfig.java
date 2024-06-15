@@ -14,6 +14,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.CommonErrorHandler;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 
 
 @Slf4j
@@ -33,8 +34,11 @@ public class ProductsCEStructuredConfig {
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
     props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, CloudEventDeserializer.class);
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+    props.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
+    props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, CloudEventDeserializer.class);
+
     return new DefaultKafkaConsumerFactory<>(
         props,
         new StringDeserializer(),
@@ -43,7 +47,7 @@ public class ProductsCEStructuredConfig {
   }
 
   @Bean
-  ConcurrentKafkaListenerContainerFactory<String, CloudEvent> kafkaListenerContainerFactory(CommonErrorHandler commonErrorHandler) {
+  ConcurrentKafkaListenerContainerFactory<String, CloudEvent> productsCEStructuredContainerFactory(CommonErrorHandler commonErrorHandler) {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, CloudEvent>();
     factory.setConsumerFactory(productsCEStructuredConsumerFactory());
     factory.setCommonErrorHandler(commonErrorHandler);

@@ -22,7 +22,8 @@ public class ProductsConsumer {
 
   private final MeterRegistry meterRegistry;
 
-  @KafkaListener(topics = "${kafka.servers.products.consumers.products.topic-name}")
+  @KafkaListener(topics = "${kafka.servers.products.consumers.products.topic-name}",
+      containerFactory = "productsContainerFactory")
   public void listenToProducts(ConsumerRecord<String, Product> message) {
     log.info("Received message from products topic. key: {}, value: {}, message: {}", message.key(), message.value(), message);
     var validationErrors = validator.validate(message.value());
