@@ -1,7 +1,9 @@
 package westmeijer.oskar.config.kafka.consumer;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -11,12 +13,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.CommonErrorHandler;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.util.backoff.FixedBackOff;
+import westmeijer.oskar.config.kafka.MetricsDefinition;
 import westmeijer.oskar.model.Product;
 
 @Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class ProductsConfig {
 
   @Value(value = "${kafka.servers.products.bootstrap-server}")
@@ -24,6 +29,8 @@ public class ProductsConfig {
 
   @Value(value = "${kafka.servers.products.consumers.products.group-id}")
   private String groupId;
+
+  private final MeterRegistry meterRegistry;
 
   @Bean
   ConsumerFactory<String, Product> productsConsumerFactory() {
@@ -41,10 +48,13 @@ public class ProductsConfig {
   }
 
   @Bean
-  ConcurrentKafkaListenerContainerFactory<String, Product> productsContainerFactory(CommonErrorHandler commonErrorHandler) {
+  ConcurrentKafkaListenerContainerFactory<String, Product> productsContainerFactory() {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, Product>();
     factory.setConsumerFactory(productsConsumerFactory());
-    factory.setCommonErrorHandler(commonErrorHandler);
+    factory.setCommonErrorHandler(new DefaultErrorHandler((record, exception) -> {
+      log.error("Record consumption failed. {}", record, exception);
+      meterRegistry.counter(MetricsDefinition.PRODUCTS_ERROR).increment();
+    }, new FixedBackOff(50L, 1L)));
     return factory;
   }
 

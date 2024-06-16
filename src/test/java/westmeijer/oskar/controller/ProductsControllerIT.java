@@ -1,11 +1,15 @@
 package westmeijer.oskar.controller;
 
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCTS_CE_STRUCTURED_CONSUMED;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCTS_CE_STRUCTURED_ERROR;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCTS_CONSUMED;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCTS_ERROR;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.SneakyThrows;
@@ -20,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import westmeijer.oskar.config.kafka.MetricsDefinition;
 import westmeijer.oskar.consumer.ProductsCEStructuredConsumer;
 import westmeijer.oskar.consumer.ProductsConsumer;
 import westmeijer.oskar.model.Product;
@@ -43,9 +48,12 @@ public class ProductsControllerIT {
   private ProductsCEStructuredConsumer productsCEStructuredConsumer;
 
   @BeforeEach
-  @AfterEach
   public void init() {
     meterRegistry.clear();
+    meterRegistry.counter(PRODUCTS_CONSUMED).count();
+    meterRegistry.counter(PRODUCTS_ERROR).count();
+    meterRegistry.counter(PRODUCTS_CE_STRUCTURED_CONSUMED).count();
+    meterRegistry.counter(PRODUCTS_CE_STRUCTURED_ERROR).count();
     productsConsumer.clearLastMessage();
     productsCEStructuredConsumer.clearLastMessage();
   }
@@ -75,14 +83,12 @@ public class ProductsControllerIT {
         .andExpect(status().isCreated());
 
     await().atMost(Durations.TEN_SECONDS).untilAsserted(() -> {
-      assertEquals(expectedProduct, productsConsumer.getLatestMsg());
-      assertEquals(1d, meterRegistry.get("products.consumed").counter().count());
+      then(expectedProduct).isEqualTo(productsConsumer.getLatestMsg());
+      then(expectedProduct).isEqualTo(productsCEStructuredConsumer.getLatestMsg());
+      then(meterRegistry.get(MetricsDefinition.PRODUCTS_CONSUMED).counter().count()).isEqualTo(1d);
+      then(meterRegistry.get(MetricsDefinition.PRODUCTS_CE_STRUCTURED_CONSUMED).counter().count()).isEqualTo(1d);
     });
 
-    await().atMost(Durations.TEN_SECONDS).untilAsserted(() -> {
-      assertEquals(expectedProduct, productsCEStructuredConsumer.getLatestMsg());
-      assertEquals(1d, meterRegistry.get("products-ce-structured.consumed").counter().count());
-    });
   }
 
 }

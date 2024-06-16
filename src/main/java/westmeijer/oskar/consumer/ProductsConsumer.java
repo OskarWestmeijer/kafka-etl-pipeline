@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import westmeijer.oskar.config.kafka.MetricsDefinition;
 import westmeijer.oskar.model.Product;
 
 @Slf4j
@@ -33,7 +34,7 @@ public class ProductsConsumer {
     }
 
     latestMsg = message.value();
-    meterRegistry.counter("products.consumed").increment();
+    meterRegistry.counter(MetricsDefinition.PRODUCTS_CONSUMED).increment();
   }
 
   public void clearLastMessage() {

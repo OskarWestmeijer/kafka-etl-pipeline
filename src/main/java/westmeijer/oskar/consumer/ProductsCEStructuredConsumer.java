@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import westmeijer.oskar.config.kafka.MetricsDefinition;
 import westmeijer.oskar.model.Product;
 
 @Slf4j
@@ -40,7 +41,6 @@ public class ProductsCEStructuredConsumer {
         .mapData(message.value(), PojoCloudEventDataMapper.from(objectMapper, Product.class));
 
     Instant ceTime = message.value().getTime().toInstant();
-    log.info("Deserialized structuredCE. value: {}, ce_time: {}", latestMsg, ceTime);
 
     var validationErrors = validator.validate(deserializedData.getValue());
     if (!validationErrors.isEmpty()) {
@@ -49,7 +49,8 @@ public class ProductsCEStructuredConsumer {
     }
 
     latestMsg = deserializedData.getValue();
-    meterRegistry.counter("products-ce-structured.consumed").increment();
+    log.info("Deserialized structuredCE. value: {}, ce_time: {}", latestMsg, ceTime);
+    meterRegistry.counter(MetricsDefinition.PRODUCTS_CE_STRUCTURED_CONSUMED).increment();
   }
 
   public void clearLastMessage() {
