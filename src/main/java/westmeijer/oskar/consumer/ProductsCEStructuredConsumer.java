@@ -35,11 +35,11 @@ public class ProductsCEStructuredConsumer {
   @KafkaListener(topics = "${kafka.servers.products.consumers.products-ce-structured.topic-name}",
       containerFactory = "productsCEStructuredContainerFactory")
   public void listenToCEStructuredProducts(ConsumerRecord<String, CloudEvent> message) {
-    log.info("Received message from products-ce-structured topic. key: {}, value: {}, message: {}", message.key(), message.value(),
-        message);
+    var cloudEvent = message.value();
+    log.info("Received message: {}", cloudEvent);
 
     PojoCloudEventData<Product> deserializedData = CloudEventUtils
-        .mapData(message.value(), PojoCloudEventDataMapper.from(objectMapper, Product.class));
+        .mapData(cloudEvent, PojoCloudEventDataMapper.from(objectMapper, Product.class));
     requireNonNull(deserializedData, "message data is required");
     var product = deserializedData.getValue();
 
@@ -50,7 +50,6 @@ public class ProductsCEStructuredConsumer {
     }
 
     latestMsg = product;
-    log.info("Deserialized structured cloud event. value: {}", product);
     meterRegistry.counter(MetricsDefinition.PRODUCTS_CE_STRUCTURED_CONSUMED).increment();
   }
 

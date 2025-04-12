@@ -9,12 +9,14 @@ import io.cloudevents.core.data.PojoCloudEventData;
 import io.cloudevents.jackson.PojoCloudEventDataMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Validator;
+import java.util.Map;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Component;
 import westmeijer.oskar.config.kafka.MetricsDefinition;
 import westmeijer.oskar.model.Product;
@@ -38,12 +40,12 @@ public class ProductsCEBinaryConsumer {
 
   @KafkaListener(topics = "${kafka.servers.products.consumers.products-ce-binary.topic-name}",
       containerFactory = "productsCEStructuredContainerFactory")
-  public void listenToCEBinaryProducts(ConsumerRecord<String, CloudEvent> message) {
-    log.info("Consumed message. topic: {}, key: {}, value: {}, message: {}", productsCEBinaryTopic, message.key(), message.value(),
-        message);
+  public void listenToCEBinaryProducts(@Headers Map<String, Object> headers, ConsumerRecord<String, CloudEvent> message) {
+    var cloudEvent = message.value();
+    log.info("Received message: {}", cloudEvent);
 
     PojoCloudEventData<Product> deserializedData = CloudEventUtils
-        .mapData(message.value(), PojoCloudEventDataMapper.from(objectMapper, Product.class));
+        .mapData(cloudEvent, PojoCloudEventDataMapper.from(objectMapper, Product.class));
     requireNonNull(deserializedData, "message data is required");
     var product = deserializedData.getValue();
 
@@ -54,7 +56,6 @@ public class ProductsCEBinaryConsumer {
     }
 
     latestMsg = product;
-    log.info("Deserialized binary cloud event. value: {}", product);
     meterRegistry.counter(MetricsDefinition.PRODUCTS_CE_BINARY_CONSUMED).increment();
   }
 

@@ -11,10 +11,10 @@ kafka:
       consumers:
         products:
           topic-name: products
-          group-id: 1234
+          group-id: products
         products-ce-structured:
           topic-name: products-ce-structured
-          group-id: 1234
+          group-id: products-ce-structured
         products-ce-binary:
           topic-name: products-ce-binary
           group-id: products-ce-binary
