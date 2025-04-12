@@ -24,7 +24,7 @@ import westmeijer.oskar.config.kafka.MetricsDefinition;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class ProductsCEStructuredConfig {
+public class ProductsCEConfig {
 
   @Value(value = "${kafka.servers.products.bootstrap-server}")
   private String bootstrapAddress;
@@ -34,8 +34,7 @@ public class ProductsCEStructuredConfig {
 
   private final MeterRegistry meterRegistry;
 
-  @Bean
-  ConsumerFactory<String, CloudEvent> productsCEStructuredConsumerFactory() {
+  private ConsumerFactory<String, CloudEvent> productsCEConsumerFactory() {
     Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -52,14 +51,26 @@ public class ProductsCEStructuredConfig {
     );
   }
 
+  private DefaultErrorHandler defaultErrorHandler(String metric) {
+    return new DefaultErrorHandler((record, exception) -> {
+      log.error("Record consumption failed. {}", record, exception);
+      meterRegistry.counter(metric).increment();
+    }, new FixedBackOff(50L, 1L));
+  }
+
   @Bean
   ConcurrentKafkaListenerContainerFactory<String, CloudEvent> productsCEStructuredContainerFactory() {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, CloudEvent>();
-    factory.setConsumerFactory(productsCEStructuredConsumerFactory());
-    factory.setCommonErrorHandler(new DefaultErrorHandler((record, exception) -> {
-      log.error("Record consumption failed. {}", record, exception);
-      meterRegistry.counter(MetricsDefinition.PRODUCTS_CE_STRUCTURED_ERROR).increment();
-    }, new FixedBackOff(50L, 1L)));
+    factory.setConsumerFactory(productsCEConsumerFactory());
+    factory.setCommonErrorHandler(defaultErrorHandler(MetricsDefinition.PRODUCTS_CE_STRUCTURED_ERROR));
+    return factory;
+  }
+
+  @Bean
+  ConcurrentKafkaListenerContainerFactory<String, CloudEvent> productsCEBinaryContainerFactory() {
+    var factory = new ConcurrentKafkaListenerContainerFactory<String, CloudEvent>();
+    factory.setConsumerFactory(productsCEConsumerFactory());
+    factory.setCommonErrorHandler(defaultErrorHandler(MetricsDefinition.PRODUCTS_CE_BINARY_ERROR));
     return factory;
   }
 

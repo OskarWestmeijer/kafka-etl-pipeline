@@ -11,7 +11,7 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdmin;
 
 @Configuration
-public class TopicConfig {
+public class ProductsTopicConfig {
 
   @Value(value = "${kafka.servers.products.bootstrap-server}")
   private String bootstrapAddress;
@@ -21,6 +21,9 @@ public class TopicConfig {
 
   @Value(value = "${kafka.servers.products.consumers.products-ce-structured.topic-name}")
   private String productsCEStructuredTopic;
+
+  @Value(value = "${kafka.servers.products.consumers.products-ce-binary.topic-name}")
+  private String productsCEBinaryTopic;
 
   @Bean
   public KafkaAdmin kafkaAdmin() {
@@ -32,7 +35,7 @@ public class TopicConfig {
   @Bean
   public NewTopic productsTopic() {
     return TopicBuilder.name(productsTopic)
-        .partitions(3)
+        .partitions(1)
         .replicas(1)
         .build();
   }
@@ -40,7 +43,15 @@ public class TopicConfig {
   @Bean
   public NewTopic productsCEStructuredTopic() {
     return TopicBuilder.name(productsCEStructuredTopic)
-        .partitions(3)
+        .partitions(1)
+        .replicas(1)
+        .build();
+  }
+
+  @Bean
+  public NewTopic productsCEBinaryTopic() {
+    return TopicBuilder.name(productsCEBinaryTopic)
+        .partitions(1)
         .replicas(1)
         .build();
   }

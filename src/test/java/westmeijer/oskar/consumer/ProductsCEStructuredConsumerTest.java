@@ -12,7 +12,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import java.time.OffsetDateTime;
 import java.util.Set;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,9 +44,6 @@ public class ProductsCEStructuredConsumerTest {
     var ceMock = mock(CloudEvent.class);
     given(consumerRecord.value()).willReturn(ceMock);
 
-    OffsetDateTime now = OffsetDateTime.now();
-    given(ceMock.getTime()).willReturn(now);
-
     PojoCloudEventData<Product> cloudEventData = PojoCloudEventData.wrap(product, objectMapper::writeValueAsBytes);
     given(ceMock.getData()).willReturn(cloudEventData);
 
@@ -65,9 +61,6 @@ public class ProductsCEStructuredConsumerTest {
     ConsumerRecord<String, CloudEvent> consumerRecord = mock(ConsumerRecord.class);
     var ceMock = mock(CloudEvent.class);
     given(consumerRecord.value()).willReturn(ceMock);
-
-    OffsetDateTime now = OffsetDateTime.now();
-    given(ceMock.getTime()).willReturn(now);
 
     PojoCloudEventData<Product> cloudEventData = PojoCloudEventData.wrap(product, objectMapper::writeValueAsBytes);
     given(ceMock.getData()).willReturn(cloudEventData);
@@ -90,9 +83,6 @@ public class ProductsCEStructuredConsumerTest {
     ConsumerRecord<String, CloudEvent> consumerRecord = mock(ConsumerRecord.class);
     var ceMock = mock(CloudEvent.class);
     given(consumerRecord.value()).willReturn(ceMock);
-
-    OffsetDateTime now = OffsetDateTime.now();
-    given(ceMock.getTime()).willReturn(now);
 
     PojoCloudEventData<Product> cloudEventData = PojoCloudEventData.wrap(product, objectMapper::writeValueAsBytes);
     given(ceMock.getData()).willReturn(cloudEventData);

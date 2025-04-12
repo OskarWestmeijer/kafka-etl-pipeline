@@ -17,6 +17,9 @@ public class MetricsDefinition {
   public static final String PRODUCTS_CE_STRUCTURED_CONSUMED = "products-ce-structured.consumed";
   public static final String PRODUCTS_CE_STRUCTURED_ERROR = "products-ce-structured.error";
 
+  public static final String PRODUCTS_CE_BINARY_CONSUMED = "products-ce-binary.consumed";
+  public static final String PRODUCTS_CE_BINARY_ERROR = "products-ce-binary.error";
+
   private final MeterRegistry meterRegistry;
 
   @PostConstruct
@@ -25,6 +28,8 @@ public class MetricsDefinition {
     meterRegistry.counter(PRODUCTS_ERROR).count();
     meterRegistry.counter(PRODUCTS_CE_STRUCTURED_CONSUMED).count();
     meterRegistry.counter(PRODUCTS_CE_STRUCTURED_ERROR).count();
+    meterRegistry.counter(PRODUCTS_CE_BINARY_CONSUMED).count();
+    meterRegistry.counter(PRODUCTS_CE_BINARY_ERROR).count();
   }
 
 }

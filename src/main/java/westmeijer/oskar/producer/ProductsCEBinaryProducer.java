@@ -20,29 +20,29 @@ import westmeijer.oskar.model.Product;
 
 @Slf4j
 @Component
-public class ProductsCEStructuredProducer {
+public class ProductsCEBinaryProducer {
 
-  private final String productsCEStructuredTopic;
-  private final KafkaTemplate<String, CloudEvent> productCEStructuredKafkaTemplate;
+  private final String productsCEBinaryTopic;
+  private final KafkaTemplate<String, CloudEvent> productCEBinaryKafkaTemplate;
   private final ObjectMapper objectMapper;
 
-  public ProductsCEStructuredProducer(
-      @Value(value = "${kafka.servers.products.consumers.products-ce-structured.topic-name}") String productsCEStructuredTopic,
-      @Qualifier(value = "productsCEStructuredKafkaTemplate") KafkaTemplate<String, CloudEvent> productCEStructuredKafkaTemplate,
+  public ProductsCEBinaryProducer(
+      @Value(value = "${kafka.servers.products.consumers.products-ce-binary.topic-name}") String productsCEBinaryTopic,
+      @Qualifier(value = "productsCEStructuredKafkaTemplate") KafkaTemplate<String, CloudEvent> productCEBinaryKafkaTemplate,
       ObjectMapper objectMapper) {
-    this.productsCEStructuredTopic = productsCEStructuredTopic;
-    this.productCEStructuredKafkaTemplate = productCEStructuredKafkaTemplate;
+    this.productsCEBinaryTopic = productsCEBinaryTopic;
+    this.productCEBinaryKafkaTemplate = productCEBinaryKafkaTemplate;
     this.objectMapper = objectMapper;
   }
 
   private final CloudEventBuilder ceEventTemplate = CloudEventBuilder.v1()
       .withSource(URI.create("https://oskar-westmeijer.com"))
-      .withType("products-ce-structured")
+      .withType("products-ce-binary")
       .withDataContentType("application/cloudevents+json");
 
   public void sendMessage(Product product) {
     Objects.requireNonNull(product);
-    log.info("Producing to topic: {}, message: {}", productsCEStructuredTopic, product);
+    log.info("Producing to topic: {}, message: {}", productsCEBinaryTopic, product);
     String productJson;
     try {
       productJson = objectMapper.writeValueAsString(product);
@@ -57,7 +57,7 @@ public class ProductsCEStructuredProducer {
         .withData(productJson.getBytes(StandardCharsets.UTF_8))
         .build();
 
-    productCEStructuredKafkaTemplate.send(productsCEStructuredTopic, String.valueOf(product.id()), productCE);
+    productCEBinaryKafkaTemplate.send(productsCEBinaryTopic, String.valueOf(product.id()), productCE);
   }
 
 }

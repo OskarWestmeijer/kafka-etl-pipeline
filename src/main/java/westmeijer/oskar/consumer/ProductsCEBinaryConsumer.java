@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import westmeijer.oskar.config.kafka.MetricsDefinition;
@@ -21,7 +22,7 @@ import westmeijer.oskar.model.Product;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class ProductsCEStructuredConsumer {
+public class ProductsCEBinaryConsumer {
 
   @Getter
   private Product latestMsg;
@@ -32,10 +33,13 @@ public class ProductsCEStructuredConsumer {
 
   private final MeterRegistry meterRegistry;
 
-  @KafkaListener(topics = "${kafka.servers.products.consumers.products-ce-structured.topic-name}",
+  @Value(value = "${kafka.servers.products.consumers.products-ce-binary.topic-name}")
+  private String productsCEBinaryTopic;
+
+  @KafkaListener(topics = "${kafka.servers.products.consumers.products-ce-binary.topic-name}",
       containerFactory = "productsCEStructuredContainerFactory")
-  public void listenToCEStructuredProducts(ConsumerRecord<String, CloudEvent> message) {
-    log.info("Received message from products-ce-structured topic. key: {}, value: {}, message: {}", message.key(), message.value(),
+  public void listenToCEBinaryProducts(ConsumerRecord<String, CloudEvent> message) {
+    log.info("Consumed message. topic: {}, key: {}, value: {}, message: {}", productsCEBinaryTopic, message.key(), message.value(),
         message);
 
     PojoCloudEventData<Product> deserializedData = CloudEventUtils
@@ -50,8 +54,8 @@ public class ProductsCEStructuredConsumer {
     }
 
     latestMsg = product;
-    log.info("Deserialized structured cloud event. value: {}", product);
-    meterRegistry.counter(MetricsDefinition.PRODUCTS_CE_STRUCTURED_CONSUMED).increment();
+    log.info("Deserialized binary cloud event. value: {}", product);
+    meterRegistry.counter(MetricsDefinition.PRODUCTS_CE_BINARY_CONSUMED).increment();
   }
 
   public void clearLastMessage() {

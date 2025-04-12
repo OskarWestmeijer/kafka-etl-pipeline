@@ -15,25 +15,29 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 
 @Configuration
-public class ProductsCEStructuredProducerConfig {
+public class ProductsCEProducerConfig {
 
   @Value(value = "${kafka.servers.products.bootstrap-server}")
   private String bootstrapAddress;
 
-  @Bean
-  public ProducerFactory<String, CloudEvent> productsCEStructuredProducerFactory() {
+  private ProducerFactory<String, CloudEvent> productsCEProducerFactory(Encoding cloudEventEncoding) {
     Map<String, Object> configProps = new HashMap<>();
     configProps.put(org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     configProps.put(org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     configProps.put(org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, CloudEventSerializer.class);
-    configProps.put(CloudEventSerializer.ENCODING_CONFIG, Encoding.STRUCTURED);
+    configProps.put(CloudEventSerializer.ENCODING_CONFIG, cloudEventEncoding);
     configProps.put(CloudEventSerializer.EVENT_FORMAT_CONFIG, JsonFormat.CONTENT_TYPE);
     return new DefaultKafkaProducerFactory<>(configProps);
   }
 
   @Bean(value = "productsCEStructuredKafkaTemplate")
   public KafkaTemplate<String, CloudEvent> productsCEStructuredKafkaTemplate() {
-    return new KafkaTemplate<>(productsCEStructuredProducerFactory());
+    return new KafkaTemplate<>(productsCEProducerFactory(Encoding.STRUCTURED));
+  }
+
+  @Bean(value = "productsCEBinaryKafkaTemplate")
+  public KafkaTemplate<String, CloudEvent> productsCEBinaryKafkaTemplate() {
+    return new KafkaTemplate<>(productsCEProducerFactory(Encoding.BINARY));
   }
 
 }
