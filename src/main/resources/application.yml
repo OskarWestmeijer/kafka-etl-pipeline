@@ -15,6 +15,9 @@ kafka:
         products-ce-structured:
           topic-name: products-ce-structured
           group-id: 1234
+        products-ce-binary:
+          topic-name: products-ce-binary
+          group-id: products-ce-binary
 
 management:
   endpoints:
