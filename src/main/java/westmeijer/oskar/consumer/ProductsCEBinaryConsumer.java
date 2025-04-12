@@ -9,11 +9,14 @@ import io.cloudevents.core.data.PojoCloudEventData;
 import io.cloudevents.jackson.PojoCloudEventDataMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Validator;
+import java.util.Map;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Component;
 import westmeijer.oskar.config.kafka.MetricsDefinition;
 import westmeijer.oskar.model.Product;
@@ -21,7 +24,7 @@ import westmeijer.oskar.model.Product;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class ProductsCEStructuredConsumer {
+public class ProductsCEBinaryConsumer {
 
   @Getter
   private Product latestMsg;
@@ -32,9 +35,12 @@ public class ProductsCEStructuredConsumer {
 
   private final MeterRegistry meterRegistry;
 
-  @KafkaListener(topics = "${kafka.servers.products.consumers.products-ce-structured.topic-name}",
+  @Value(value = "${kafka.servers.products.consumers.products-ce-binary.topic-name}")
+  private String productsCEBinaryTopic;
+
+  @KafkaListener(topics = "${kafka.servers.products.consumers.products-ce-binary.topic-name}",
       containerFactory = "productsCEStructuredContainerFactory")
-  public void listenToCEStructuredProducts(ConsumerRecord<String, CloudEvent> message) {
+  public void listenToCEBinaryProducts(@Headers Map<String, Object> headers, ConsumerRecord<String, CloudEvent> message) {
     var cloudEvent = message.value();
     log.info("Received message: {}", cloudEvent);
 
@@ -50,7 +56,7 @@ public class ProductsCEStructuredConsumer {
     }
 
     latestMsg = product;
-    meterRegistry.counter(MetricsDefinition.PRODUCTS_CE_STRUCTURED_CONSUMED).increment();
+    meterRegistry.counter(MetricsDefinition.PRODUCTS_CE_BINARY_CONSUMED).increment();
   }
 
   public void clearLastMessage() {
