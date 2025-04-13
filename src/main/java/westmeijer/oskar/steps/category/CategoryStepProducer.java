@@ -23,7 +23,6 @@ import westmeijer.oskar.steps.Steps;
 @Component
 public class CategoryStepProducer implements StepProducer {
 
-  private final Steps step = Steps.CATEGORY_ASSIGNMENT;
   private final KafkaTemplate<String, CloudEvent> binaryCloudEventsKafkaTemplate;
   private final ObjectMapper objectMapper;
 
@@ -38,7 +37,7 @@ public class CategoryStepProducer implements StepProducer {
   @Override
   public void produce(Product product) {
     Objects.requireNonNull(product);
-    log.info("Producing to topic: {}, message: {}", step.outputTopic, product);
+    log.info("Producing to topic: {}, message: {}", getOutgoingTopic(), product);
     String productJson;
     try {
       productJson = objectMapper.writeValueAsString(product);
@@ -53,7 +52,12 @@ public class CategoryStepProducer implements StepProducer {
         .withData(productJson.getBytes(StandardCharsets.UTF_8))
         .build();
 
-    binaryCloudEventsKafkaTemplate.send(step.outputTopic, String.valueOf(product.id()), productCE);
+    binaryCloudEventsKafkaTemplate.send(getOutgoingTopic(), String.valueOf(product.id()), productCE);
+  }
+
+  @Override
+  public String getOutgoingTopic() {
+    return Steps.CATEGORY_ASSIGNMENT.outputTopic;
   }
 
 }

@@ -2,6 +2,7 @@ package westmeijer.oskar.steps;
 
 public enum Steps {
 
+  KICK_OFF(null, Topics.CATEGORY),
   CATEGORY_ASSIGNMENT(Topics.CATEGORY, Topics.PRICE),
   PRICE_ASSIGNMENT(Topics.PRICE, Topics.STOCK),
   STOCK_ASSIGNMENT(Topics.STOCK, null);
@@ -9,7 +10,7 @@ public enum Steps {
   public final String inputTopic;
   public final String outputTopic;
 
-  private Steps(String inputTopic, String outputTopic) {
+  Steps(String inputTopic, String outputTopic) {
     this.inputTopic = inputTopic;
     this.outputTopic = outputTopic;
   }

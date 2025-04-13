@@ -1,4 +1,4 @@
-package westmeijer.oskar.steps.stock;
+package westmeijer.oskar.steps.start;
 
 import static westmeijer.oskar.steps.CloudEventMetadata.ceEventTemplate;
 
@@ -11,8 +11,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import westmeijer.oskar.service.model.Product;
@@ -21,18 +21,11 @@ import westmeijer.oskar.steps.Steps;
 
 @Slf4j
 @Component
-public class StockStepProducer implements StepProducer {
+@RequiredArgsConstructor
+public class KickOffStepProducer implements StepProducer {
 
   private final KafkaTemplate<String, CloudEvent> binaryCloudEventsKafkaTemplate;
   private final ObjectMapper objectMapper;
-
-  public StockStepProducer(
-      @Qualifier(value = "binaryCloudEventsKafkaTemplate")
-      KafkaTemplate<String, CloudEvent> binaryCloudEventsKafkaTemplate,
-      ObjectMapper objectMapper) {
-    this.binaryCloudEventsKafkaTemplate = binaryCloudEventsKafkaTemplate;
-    this.objectMapper = objectMapper;
-  }
 
   @Override
   public void produce(Product product) {
@@ -51,13 +44,11 @@ public class StockStepProducer implements StepProducer {
         .withTime(OffsetDateTime.ofInstant(Instant.now(), ZoneId.of("Europe/Berlin")))
         .withData(productJson.getBytes(StandardCharsets.UTF_8))
         .build();
-
-    binaryCloudEventsKafkaTemplate.send(getOutgoingTopic().toString(), String.valueOf(product.id()), productCE);
+    binaryCloudEventsKafkaTemplate.send(getOutgoingTopic(), String.valueOf(product.id()), productCE);
   }
 
   @Override
   public String getOutgoingTopic() {
-    return Steps.STOCK_ASSIGNMENT.outputTopic;
+    return Steps.KICK_OFF.outputTopic;
   }
-
 }

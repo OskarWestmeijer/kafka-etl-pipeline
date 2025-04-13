@@ -17,11 +17,12 @@ import org.springframework.stereotype.Component;
 import westmeijer.oskar.config.kafka.MetricsDefinition;
 import westmeijer.oskar.service.model.Product;
 import westmeijer.oskar.steps.StepConsumer;
+import westmeijer.oskar.steps.Steps;
 import westmeijer.oskar.steps.Steps.Topics;
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class PriceStepConsumer implements StepConsumer {
 
   private final Validator validator;
