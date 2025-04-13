@@ -13,26 +13,25 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-import westmeijer.oskar.model.Product;
+import westmeijer.oskar.service.model.Product;
 import westmeijer.oskar.steps.StepProducer;
+import westmeijer.oskar.steps.Steps;
 
 @Slf4j
 @Component
 public class CategoryStepProducer implements StepProducer {
 
-  private final String productsCEBinaryTopic;
-  private final KafkaTemplate<String, CloudEvent> productCEBinaryKafkaTemplate;
+  private final Steps step = Steps.CATEGORY_ASSIGNMENT;
+  private final KafkaTemplate<String, CloudEvent> binaryCloudEventsKafkaTemplate;
   private final ObjectMapper objectMapper;
 
   public CategoryStepProducer(
-      @Value(value = "${kafka.servers.products.consumers.products-ce-binary.topic-name}") String productsCEBinaryTopic,
-      @Qualifier(value = "productsCEStructuredKafkaTemplate") KafkaTemplate<String, CloudEvent> productCEBinaryKafkaTemplate,
+      @Qualifier(value = "binaryCloudEventsKafkaTemplate")
+      KafkaTemplate<String, CloudEvent> binaryCloudEventsKafkaTemplate,
       ObjectMapper objectMapper) {
-    this.productsCEBinaryTopic = productsCEBinaryTopic;
-    this.productCEBinaryKafkaTemplate = productCEBinaryKafkaTemplate;
+    this.binaryCloudEventsKafkaTemplate = binaryCloudEventsKafkaTemplate;
     this.objectMapper = objectMapper;
   }
 
@@ -44,7 +43,7 @@ public class CategoryStepProducer implements StepProducer {
   @Override
   public void produce(Product product) {
     Objects.requireNonNull(product);
-    log.info("Producing to topic: {}, message: {}", productsCEBinaryTopic, product);
+    log.info("Producing to topic: {}, message: {}", step.outputTopic, product);
     String productJson;
     try {
       productJson = objectMapper.writeValueAsString(product);
@@ -59,7 +58,7 @@ public class CategoryStepProducer implements StepProducer {
         .withData(productJson.getBytes(StandardCharsets.UTF_8))
         .build();
 
-    productCEBinaryKafkaTemplate.send(productsCEBinaryTopic, String.valueOf(product.id()), productCE);
+    binaryCloudEventsKafkaTemplate.send(step.outputTopic, String.valueOf(product.id()), productCE);
   }
 
 }

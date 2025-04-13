@@ -9,21 +9,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdmin;
+import westmeijer.oskar.steps.Steps.Topics;
 
 @Configuration
 public class ProductsTopicConfig {
 
   @Value(value = "${kafka.servers.products.bootstrap-server}")
   private String bootstrapAddress;
-
-  @Value(value = "${kafka.servers.products.consumers.products.topic-name}")
-  private String productsTopic;
-
-  @Value(value = "${kafka.servers.products.consumers.products-ce-structured.topic-name}")
-  private String productsCEStructuredTopic;
-
-  @Value(value = "${kafka.servers.products.consumers.products-ce-binary.topic-name}")
-  private String productsCEBinaryTopic;
 
   @Bean
   public KafkaAdmin kafkaAdmin() {
@@ -33,24 +25,24 @@ public class ProductsTopicConfig {
   }
 
   @Bean
-  public NewTopic productsTopic() {
-    return TopicBuilder.name(productsTopic)
+  public NewTopic categoryAssignmentTopic() {
+    return TopicBuilder.name(Topics.CATEGORY)
         .partitions(1)
         .replicas(1)
         .build();
   }
 
   @Bean
-  public NewTopic productsCEStructuredTopic() {
-    return TopicBuilder.name(productsCEStructuredTopic)
+  public NewTopic priceAssignmentTopic() {
+    return TopicBuilder.name(Topics.PRICE)
         .partitions(1)
         .replicas(1)
         .build();
   }
 
   @Bean
-  public NewTopic productsCEBinaryTopic() {
-    return TopicBuilder.name(productsCEBinaryTopic)
+  public NewTopic stockAssignmentTopic() {
+    return TopicBuilder.name(Topics.STOCK)
         .partitions(1)
         .replicas(1)
         .build();

@@ -25,8 +25,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import westmeijer.oskar.config.kafka.MetricsDefinition;
 import westmeijer.oskar.steps.price.PriceStepConsumer;
-import westmeijer.oskar.consumer.ProductsConsumer;
-import westmeijer.oskar.model.Product;
+import westmeijer.oskar.steps.stock.StockStepConsumer;
+import westmeijer.oskar.service.model.Product;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -41,7 +41,7 @@ public class ProductsControllerIT {
   private MeterRegistry meterRegistry;
 
   @Autowired
-  private ProductsConsumer productsConsumer;
+  private StockStepConsumer stockStepConsumer;
 
   @Autowired
   private PriceStepConsumer priceTopicConsumer;
@@ -53,7 +53,7 @@ public class ProductsControllerIT {
     meterRegistry.counter(PRODUCTS_ERROR).count();
     meterRegistry.counter(PRODUCTS_CE_STRUCTURED_CONSUMED).count();
     meterRegistry.counter(PRODUCTS_CE_STRUCTURED_ERROR).count();
-    productsConsumer.clearLastMessage();
+    stockStepConsumer.clearLastMessage();
     priceTopicConsumer.clearLastMessage();
   }
 
@@ -82,7 +82,7 @@ public class ProductsControllerIT {
         .andExpect(status().isCreated());
 
     await().atMost(Durations.TEN_SECONDS).untilAsserted(() -> {
-      then(expectedProduct).isEqualTo(productsConsumer.getLatestMsg());
+      then(expectedProduct).isEqualTo(stockStepConsumer.getLatestMsg());
       then(expectedProduct).isEqualTo(priceTopicConsumer.getLatestMsg());
       then(meterRegistry.get(MetricsDefinition.PRODUCTS_CONSUMED).counter().count()).isEqualTo(1d);
       then(meterRegistry.get(MetricsDefinition.PRODUCTS_CE_STRUCTURED_CONSUMED).counter().count()).isEqualTo(1d);

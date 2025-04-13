@@ -12,11 +12,10 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import westmeijer.oskar.config.kafka.MetricsDefinition;
-import westmeijer.oskar.model.Product;
+import westmeijer.oskar.service.model.Product;
 import westmeijer.oskar.steps.StepConsumer;
 
 @Slf4j
@@ -30,13 +29,10 @@ public class CategoryStepConsumer implements StepConsumer {
 
   private final MeterRegistry meterRegistry;
 
-  @Value(value = "${kafka.servers.products.consumers.products-ce-binary.topic-name}")
-  private String productsCEBinaryTopic;
-
   private final CategoryStepProcessor categoryStepProcessor;
 
-  @KafkaListener(topics = "${kafka.servers.products.consumers.products-ce-binary.topic-name}",
-      containerFactory = "productsCEStructuredContainerFactory")
+  @KafkaListener(topics = "${kafka.servers.products.steps.category-assignment.topic-name}",
+      containerFactory = "binaryCloudEventContainerFactory")
   @Override
   public void consume(ConsumerRecord<String, CloudEvent> message) {
     var cloudEvent = message.value();

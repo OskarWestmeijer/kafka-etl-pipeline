@@ -1,4 +1,4 @@
-package westmeijer.oskar.steps.price;
+package westmeijer.oskar.steps.stock;
 
 import static java.util.Objects.requireNonNull;
 
@@ -21,7 +21,7 @@ import westmeijer.oskar.steps.StepConsumer;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class PriceStepConsumer implements StepConsumer {
+public class StockStepConsumer implements StepConsumer {
 
   private final Validator validator;
 
@@ -29,14 +29,13 @@ public class PriceStepConsumer implements StepConsumer {
 
   private final MeterRegistry meterRegistry;
 
-  private final PriceStepProcessor priceStepProcessor;
+  private final StockStepProcessor stockStepProcessor;
 
-  @KafkaListener(topics = "${kafka.servers.products.steps.price-assignment.topic-name}",
+  @KafkaListener(topics = "${kafka.servers.products.steps.stock-assignment.topic-name}",
       containerFactory = "binaryCloudEventContainerFactory")
-  @Override
   public void consume(ConsumerRecord<String, CloudEvent> message) {
+    log.info("Received message from products topic. key: {}, value: {}, message: {}", message.key(), message.value(), message);
     var cloudEvent = message.value();
-    log.info("Received message: {}", cloudEvent);
 
     PojoCloudEventData<Product> deserializedData = CloudEventUtils
         .mapData(cloudEvent, PojoCloudEventDataMapper.from(objectMapper, Product.class));
@@ -49,8 +48,8 @@ public class PriceStepConsumer implements StepConsumer {
       throw new IllegalArgumentException(validationErrors.toString());
     }
 
-    priceStepProcessor.process(product);
-    meterRegistry.counter(MetricsDefinition.PRODUCTS_CE_STRUCTURED_CONSUMED).increment();
+    stockStepProcessor.process(product);
+    meterRegistry.counter(MetricsDefinition.PRODUCTS_CONSUMED).increment();
   }
 
 }

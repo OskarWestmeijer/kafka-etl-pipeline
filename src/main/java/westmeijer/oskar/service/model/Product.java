@@ -1,4 +1,4 @@
-package westmeijer.oskar.model;
+package westmeijer.oskar.service.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -10,7 +10,8 @@ import org.apache.commons.lang3.ObjectUtils;
 public record Product(Integer id,
                       String name,
                       String category,
-                      BigDecimal price) implements Serializable {
+                      BigDecimal price,
+                      Integer stock) implements Serializable {
 
   public Product {
     Objects.requireNonNull(id, "id cannot be null");

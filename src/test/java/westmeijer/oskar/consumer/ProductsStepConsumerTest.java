@@ -9,7 +9,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import java.util.List;
 import java.util.Set;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import westmeijer.oskar.model.Product;
+import westmeijer.oskar.service.model.Product;
+import westmeijer.oskar.steps.stock.StockStepConsumer;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductsStepConsumerTest {
@@ -25,13 +25,13 @@ public class ProductsStepConsumerTest {
 
   private final MeterRegistry meterRegistry = new SimpleMeterRegistry();
   private final Validator validator = mock(Validator.class);
-  private ProductsConsumer productsConsumer;
+  private StockStepConsumer stockStepConsumer;
 
   @BeforeEach
   void setup() {
-    productsConsumer = new ProductsConsumer(validator, meterRegistry);
+    stockStepConsumer = new StockStepConsumer(validator, meterRegistry);
     meterRegistry.clear();
-    productsConsumer.clearLastMessage();
+    stockStepConsumer.clearLastMessage();
   }
 
   @Test
@@ -40,8 +40,8 @@ public class ProductsStepConsumerTest {
     ConsumerRecord<String, Product> consumerRecord = mock(ConsumerRecord.class);
     given(consumerRecord.value()).willReturn(product);
 
-    productsConsumer.listenToProducts(consumerRecord);
-    then(productsConsumer.getLatestMsg()).isEqualTo(product);
+    stockStepConsumer.listenToProducts(consumerRecord);
+    then(stockStepConsumer.getLatestMsg()).isEqualTo(product);
     then(meterRegistry.counter("products.consumed").count()).isEqualTo(1d);
     BDDMockito.then(validator).should().validate(product);
   }
@@ -55,10 +55,10 @@ public class ProductsStepConsumerTest {
     ConstraintViolation<Product> violation = mock(ConstraintViolation.class);
     given(validator.validate(product)).willReturn(Set.of(violation));
 
-    thenThrownBy(() -> productsConsumer.listenToProducts(consumerRecord))
+    thenThrownBy(() -> stockStepConsumer.listenToProducts(consumerRecord))
         .isInstanceOf(IllegalArgumentException.class);
 
-    then(productsConsumer.getLatestMsg()).isNull();
+    then(stockStepConsumer.getLatestMsg()).isNull();
     then(meterRegistry.counter("products.consumed").count()).isEqualTo(0d);
     BDDMockito.then(validator).should().validate(product);
   }
@@ -69,12 +69,12 @@ public class ProductsStepConsumerTest {
     ConsumerRecord<String, Product> consumerRecord = mock(ConsumerRecord.class);
     given(consumerRecord.value()).willReturn(product);
 
-    productsConsumer.listenToProducts(consumerRecord);
-    then(productsConsumer.getLatestMsg()).isEqualTo(product);
+    stockStepConsumer.listenToProducts(consumerRecord);
+    then(stockStepConsumer.getLatestMsg()).isEqualTo(product);
     then(meterRegistry.counter("products.consumed").count()).isEqualTo(1d);
 
-    productsConsumer.clearLastMessage();
-    then(productsConsumer.getLatestMsg()).isNull();
+    stockStepConsumer.clearLastMessage();
+    then(stockStepConsumer.getLatestMsg()).isNull();
 
     BDDMockito.then(validator).should().validate(product);
   }

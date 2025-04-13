@@ -1,4 +1,4 @@
-package westmeijer.oskar.steps.price;
+package westmeijer.oskar.steps.stock;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +12,7 @@ import java.time.ZoneId;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -21,9 +22,9 @@ import westmeijer.oskar.steps.Steps;
 
 @Slf4j
 @Component
-public class PriceStepProducer implements StepProducer {
+public class StockStepProducer implements StepProducer {
 
-  private final Steps step = Steps.PRICE_ASSIGNMENT;
+  private final Steps step = Steps.STOCK_ASSIGNMENT;
   private final KafkaTemplate<String, CloudEvent> binaryCloudEventsKafkaTemplate;
   private final ObjectMapper objectMapper;
 
@@ -32,7 +33,7 @@ public class PriceStepProducer implements StepProducer {
       .withType("products-ce-structured")
       .withDataContentType("application/cloudevents+json");
 
-  public PriceStepProducer(
+  public StockStepProducer(
       @Qualifier(value = "binaryCloudEventsKafkaTemplate")
       KafkaTemplate<String, CloudEvent> binaryCloudEventsKafkaTemplate,
       ObjectMapper objectMapper) {

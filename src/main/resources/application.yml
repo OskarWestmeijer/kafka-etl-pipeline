@@ -8,16 +8,14 @@ kafka:
   servers:
     products:
       bootstrap-server: localhost:9092
+      group-id: products
       steps:
-        products:
-          topic-name: products
-          group-id: products
+        stock-assignment:
+          topic-name: stock-assignment
         category-assignment:
           topic-name: category-assignment
-          group-id: category-assignment-group
         price-assignment:
           topic-name: price-assignment
-          group-id: price-assignment-group
 
 management:
   endpoints:

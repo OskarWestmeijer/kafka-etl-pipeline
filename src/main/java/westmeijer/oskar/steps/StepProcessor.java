@@ -1,6 +1,6 @@
 package westmeijer.oskar.steps;
 
-import westmeijer.oskar.model.Product;
+import westmeijer.oskar.service.model.Product;
 
 public interface StepProcessor {
 

@@ -3,7 +3,8 @@ package westmeijer.oskar.steps;
 public enum Steps {
 
   CATEGORY_ASSIGNMENT(Topics.CATEGORY, Topics.PRICE),
-  PRICE_ASSIGNMENT(Topics.PRICE, null);
+  PRICE_ASSIGNMENT(Topics.PRICE, Topics.STOCK),
+  STOCK_ASSIGNMENT(Topics.STOCK, null);
 
   public final String inputTopic;
   public final String outputTopic;
@@ -17,6 +18,7 @@ public enum Steps {
 
     public static final String CATEGORY = "category-assignment";
     public static final String PRICE = "price-assignment";
+    public static final String STOCK = "stock-assignment";
   }
 
 }

@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import westmeijer.oskar.model.Product;
+import westmeijer.oskar.service.model.Product;
 import westmeijer.oskar.steps.price.PriceStepConsumer;
 
 @ExtendWith(MockitoExtension.class)

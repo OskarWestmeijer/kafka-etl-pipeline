@@ -17,8 +17,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import westmeijer.oskar.config.kafka.MetricsDefinition;
-import westmeijer.oskar.consumer.ProductsConsumer;
-import westmeijer.oskar.model.Product;
+import westmeijer.oskar.steps.stock.StockStepConsumer;
+import westmeijer.oskar.service.model.Product;
+import westmeijer.oskar.steps.stock.StockStepProducer;
 
 @SpringBootTest
 @DirtiesContext
@@ -26,10 +27,10 @@ import westmeijer.oskar.model.Product;
 public class ProductsIT {
 
   @Autowired
-  private ProductsProducer producer;
+  private StockStepProducer producer;
 
   @Autowired
-  private ProductsConsumer consumer;
+  private StockStepConsumer consumer;
 
   @Autowired
   private MeterRegistry meterRegistry;
