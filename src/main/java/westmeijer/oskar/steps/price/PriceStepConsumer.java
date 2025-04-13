@@ -51,7 +51,7 @@ public class PriceStepConsumer implements StepConsumer {
     }
 
     priceStepProcessor.process(product);
-    meterRegistry.counter(MetricsDefinition.PRODUCTS_CE_STRUCTURED_CONSUMED).increment();
+    meterRegistry.counter(MetricsDefinition.CATEGORY_ASSIGNED).increment();
   }
 
 }

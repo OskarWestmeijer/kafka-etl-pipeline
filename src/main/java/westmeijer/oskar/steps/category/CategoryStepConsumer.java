@@ -51,7 +51,7 @@ public class CategoryStepConsumer implements StepConsumer {
     }
 
     categoryStepProcessor.process(product);
-    meterRegistry.counter(MetricsDefinition.PRODUCTS_CE_BINARY_CONSUMED).increment();
+    meterRegistry.counter(MetricsDefinition.PRICE_ASSIGNED).increment();
   }
 
 }

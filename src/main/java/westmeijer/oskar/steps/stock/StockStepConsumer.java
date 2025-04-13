@@ -50,7 +50,7 @@ public class StockStepConsumer implements StepConsumer {
     }
 
     stockStepProcessor.process(product);
-    meterRegistry.counter(MetricsDefinition.PRODUCTS_CONSUMED).increment();
+    meterRegistry.counter(MetricsDefinition.STOCK_ASSIGNED).increment();
   }
 
 }
