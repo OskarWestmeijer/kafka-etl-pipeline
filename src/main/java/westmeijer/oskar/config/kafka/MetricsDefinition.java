@@ -11,25 +11,25 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MetricsDefinition {
 
-  public static final String PRODUCTS_CONSUMED = "products.consumed";
-  public static final String PRODUCTS_ERROR = "products.error";
+  public static final String CATEGORY_ASSIGNED = "category.assigned";
+  public static final String CATEGORY_ERROR = "category.error";
 
-  public static final String PRODUCTS_CE_STRUCTURED_CONSUMED = "products-ce-structured.consumed";
-  public static final String PRODUCTS_CE_STRUCTURED_ERROR = "products-ce-structured.error";
+  public static final String PRICE_ASSIGNED = "price.assigned";
+  public static final String PRICE_ERROR = "price.error";
 
-  public static final String PRODUCTS_CE_BINARY_CONSUMED = "products-ce-binary.consumed";
-  public static final String PRODUCTS_CE_BINARY_ERROR = "products-ce-binary.error";
+  public static final String STOCK_ASSIGNED = "stock.assigned";
+  public static final String STOCK_ERROR = "stock.error";
 
   private final MeterRegistry meterRegistry;
 
   @PostConstruct
   void init() {
-    meterRegistry.counter(PRODUCTS_CONSUMED).count();
-    meterRegistry.counter(PRODUCTS_ERROR).count();
-    meterRegistry.counter(PRODUCTS_CE_STRUCTURED_CONSUMED).count();
-    meterRegistry.counter(PRODUCTS_CE_STRUCTURED_ERROR).count();
-    meterRegistry.counter(PRODUCTS_CE_BINARY_CONSUMED).count();
-    meterRegistry.counter(PRODUCTS_CE_BINARY_ERROR).count();
+    meterRegistry.counter(STOCK_ASSIGNED).count();
+    meterRegistry.counter(STOCK_ERROR).count();
+    meterRegistry.counter(CATEGORY_ASSIGNED).count();
+    meterRegistry.counter(CATEGORY_ERROR).count();
+    meterRegistry.counter(PRICE_ASSIGNED).count();
+    meterRegistry.counter(PRICE_ERROR).count();
   }
 
 }

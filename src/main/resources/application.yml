@@ -8,16 +8,14 @@ kafka:
   servers:
     products:
       bootstrap-server: localhost:9092
-      consumers:
-        products:
-          topic-name: products
-          group-id: products
-        products-ce-structured:
-          topic-name: products-ce-structured
-          group-id: products-ce-structured
-        products-ce-binary:
-          topic-name: products-ce-binary
-          group-id: products-ce-binary
+      group-id: products
+      steps:
+        stock-assignment:
+          topic-name: stock-assignment
+        category-assignment:
+          topic-name: category-assignment
+        price-assignment:
+          topic-name: price-assignment
 
 management:
   endpoints:

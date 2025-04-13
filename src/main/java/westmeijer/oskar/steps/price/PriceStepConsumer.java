@@ -1,4 +1,4 @@
-package westmeijer.oskar.consumer;
+package westmeijer.oskar.steps.price;
 
 import static java.util.Objects.requireNonNull;
 
@@ -9,25 +9,21 @@ import io.cloudevents.core.data.PojoCloudEventData;
 import io.cloudevents.jackson.PojoCloudEventDataMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Validator;
-import java.util.Map;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Component;
 import westmeijer.oskar.config.kafka.MetricsDefinition;
-import westmeijer.oskar.model.Product;
+import westmeijer.oskar.service.model.Product;
+import westmeijer.oskar.steps.StepConsumer;
+import westmeijer.oskar.steps.Steps;
+import westmeijer.oskar.steps.Steps.Topics;
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
-public class ProductsCEBinaryConsumer {
-
-  @Getter
-  private Product latestMsg;
+@RequiredArgsConstructor
+public class PriceStepConsumer implements StepConsumer {
 
   private final Validator validator;
 
@@ -35,12 +31,12 @@ public class ProductsCEBinaryConsumer {
 
   private final MeterRegistry meterRegistry;
 
-  @Value(value = "${kafka.servers.products.consumers.products-ce-binary.topic-name}")
-  private String productsCEBinaryTopic;
+  private final PriceStepProcessor priceStepProcessor;
 
-  @KafkaListener(topics = "${kafka.servers.products.consumers.products-ce-binary.topic-name}",
-      containerFactory = "productsCEStructuredContainerFactory")
-  public void listenToCEBinaryProducts(@Headers Map<String, Object> headers, ConsumerRecord<String, CloudEvent> message) {
+  @KafkaListener(topics = Topics.PRICE,
+      containerFactory = "binaryCloudEventContainerFactory")
+  @Override
+  public void consume(ConsumerRecord<String, CloudEvent> message) {
     var cloudEvent = message.value();
     log.info("Received message: {}", cloudEvent);
 
@@ -55,12 +51,8 @@ public class ProductsCEBinaryConsumer {
       throw new IllegalArgumentException(validationErrors.toString());
     }
 
-    latestMsg = product;
-    meterRegistry.counter(MetricsDefinition.PRODUCTS_CE_BINARY_CONSUMED).increment();
-  }
-
-  public void clearLastMessage() {
-    latestMsg = null;
+    priceStepProcessor.process(product);
+    meterRegistry.counter(MetricsDefinition.CATEGORY_ASSIGNED).increment();
   }
 
 }

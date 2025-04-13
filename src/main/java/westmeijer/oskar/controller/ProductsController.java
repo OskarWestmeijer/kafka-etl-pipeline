@@ -8,19 +8,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import westmeijer.oskar.model.Product;
-import westmeijer.oskar.producer.ProductsCEBinaryProducer;
-import westmeijer.oskar.producer.ProductsCEStructuredProducer;
-import westmeijer.oskar.producer.ProductsProducer;
+import westmeijer.oskar.controller.model.ProductRequest;
+import westmeijer.oskar.service.model.Product;
+import westmeijer.oskar.service.ProductsService;
 
 @Slf4j
 @AllArgsConstructor
 @RestController
 public class ProductsController {
 
-  private final ProductsProducer productsProducer;
-  private final ProductsCEStructuredProducer productsCEStructuredProducer;
-  private final ProductsCEBinaryProducer productsCEBinaryProducer;
+  private final ProductsService productsService;
 
   @GetMapping("/ping")
   public ResponseEntity<String> ping() {
@@ -28,14 +25,19 @@ public class ProductsController {
     return new ResponseEntity<>("pong", HttpStatus.OK);
   }
 
-  // TODO: implement outbox pattern here
   @PostMapping("/products")
-  public ResponseEntity<Product> addProduct(@RequestBody Product product) {
-    log.info("Receive POST request with body: {}", product);
-    productsProducer.sendMessage(product);
-    productsCEStructuredProducer.sendMessage(product);
-    productsCEBinaryProducer.sendMessage(product);
-    return new ResponseEntity<>(product, HttpStatus.CREATED);
+  public ResponseEntity<ProductRequest> addProduct(@RequestBody ProductRequest productRequest) {
+    log.info("Receive POST request with body: {}", productRequest);
+    var product = map(productRequest);
+    productsService.startProductProcessing(product);
+    return new ResponseEntity<>(productRequest, HttpStatus.ACCEPTED);
+  }
+
+  private Product map(ProductRequest productRequest) {
+    return Product.builder()
+        .id(productRequest.id())
+        .name(productRequest.name())
+        .build();
   }
 
 }

@@ -6,15 +6,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCTS_CE_STRUCTURED_CONSUMED;
-import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCTS_CE_STRUCTURED_ERROR;
-import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCTS_CONSUMED;
-import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCTS_ERROR;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.CATEGORY_ASSIGNED;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.CATEGORY_ERROR;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.PRICE_ASSIGNED;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.PRICE_ERROR;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.STOCK_ASSIGNED;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.STOCK_ERROR;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
-import org.awaitility.Durations;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +26,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import westmeijer.oskar.config.kafka.MetricsDefinition;
-import westmeijer.oskar.consumer.ProductsCEStructuredConsumer;
-import westmeijer.oskar.consumer.ProductsConsumer;
-import westmeijer.oskar.model.Product;
+import westmeijer.oskar.controller.model.ProductRequest;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -41,21 +40,17 @@ public class ProductsControllerIT {
   @Autowired
   private MeterRegistry meterRegistry;
 
-  @Autowired
-  private ProductsConsumer productsConsumer;
-
-  @Autowired
-  private ProductsCEStructuredConsumer productsCEStructuredConsumer;
-
   @BeforeEach
   public void init() {
     meterRegistry.clear();
-    meterRegistry.counter(PRODUCTS_CONSUMED).count();
-    meterRegistry.counter(PRODUCTS_ERROR).count();
-    meterRegistry.counter(PRODUCTS_CE_STRUCTURED_CONSUMED).count();
-    meterRegistry.counter(PRODUCTS_CE_STRUCTURED_ERROR).count();
-    productsConsumer.clearLastMessage();
-    productsCEStructuredConsumer.clearLastMessage();
+
+    meterRegistry.counter(CATEGORY_ASSIGNED).count();
+    meterRegistry.counter(PRICE_ASSIGNED).count();
+    meterRegistry.counter(STOCK_ASSIGNED).count();
+
+    meterRegistry.counter(CATEGORY_ERROR).count();
+    meterRegistry.counter(PRICE_ERROR).count();
+    meterRegistry.counter(STOCK_ERROR).count();
   }
 
   @Test
@@ -69,9 +64,8 @@ public class ProductsControllerIT {
 
   @Test
   @SneakyThrows
-  void shouldProduceAndConsumeMessages() {
-
-    var expectedProduct = new Product(1234, "Effective Java");
+  void shouldRunPipeline() {
+    var productRequest = new ProductRequest(1234, "Effective Java");
 
     mockMvc.perform(post("/products")
             .contentType(MediaType.APPLICATION_JSON)
@@ -79,14 +73,18 @@ public class ProductsControllerIT {
                 {
                    "id":%s,
                    "name":"%s"
-                }""".formatted(expectedProduct.id(), expectedProduct.name())))
-        .andExpect(status().isCreated());
+                }""".formatted(productRequest.id(), productRequest.name())))
+        .andExpect(status().isAccepted());
 
-    await().atMost(Durations.TEN_SECONDS).untilAsserted(() -> {
-      then(expectedProduct).isEqualTo(productsConsumer.getLatestMsg());
-      then(expectedProduct).isEqualTo(productsCEStructuredConsumer.getLatestMsg());
-      then(meterRegistry.get(MetricsDefinition.PRODUCTS_CONSUMED).counter().count()).isEqualTo(1d);
-      then(meterRegistry.get(MetricsDefinition.PRODUCTS_CE_STRUCTURED_CONSUMED).counter().count()).isEqualTo(1d);
+    await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
+      then(meterRegistry.get(MetricsDefinition.CATEGORY_ASSIGNED).counter().count()).isEqualTo(1d);
+      then(meterRegistry.get(MetricsDefinition.PRICE_ASSIGNED).counter().count()).isEqualTo(1d);
+      then(meterRegistry.get(MetricsDefinition.STOCK_ASSIGNED).counter().count()).isEqualTo(1d);
+
+      then(meterRegistry.get(MetricsDefinition.CATEGORY_ERROR).counter().count()).isEqualTo(0d);
+      then(meterRegistry.get(MetricsDefinition.PRICE_ERROR).counter().count()).isEqualTo(0d);
+      then(meterRegistry.get(MetricsDefinition.STOCK_ERROR).counter().count()).isEqualTo(0d);
+
     });
 
   }

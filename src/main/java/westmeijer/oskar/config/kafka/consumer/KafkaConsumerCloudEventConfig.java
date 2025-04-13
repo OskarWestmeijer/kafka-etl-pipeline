@@ -1,5 +1,7 @@
 package westmeijer.oskar.config.kafka.consumer;
 
+import io.cloudevents.CloudEvent;
+import io.cloudevents.kafka.CloudEventDeserializer;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,48 +15,44 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.util.backoff.FixedBackOff;
-import westmeijer.oskar.config.kafka.MetricsDefinition;
-import westmeijer.oskar.model.Product;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+
 
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class ProductsConfig {
+public class KafkaConsumerCloudEventConfig {
 
   @Value(value = "${kafka.servers.products.bootstrap-server}")
   private String bootstrapAddress;
 
-  @Value(value = "${kafka.servers.products.consumers.products.group-id}")
+  @Value(value = "${kafka.servers.products.group-id}")
   private String groupId;
 
   private final MeterRegistry meterRegistry;
 
-  @Bean
-  ConsumerFactory<String, Product> productsConsumerFactory() {
+  private ConsumerFactory<String, CloudEvent> productsCEConsumerFactory() {
     Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
     props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+    props.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
+    props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, CloudEventDeserializer.class);
+
     return new DefaultKafkaConsumerFactory<>(
         props,
         new StringDeserializer(),
-        new JsonDeserializer<>(Product.class)
+        new CloudEventDeserializer()
     );
   }
 
   @Bean
-  ConcurrentKafkaListenerContainerFactory<String, Product> productsContainerFactory() {
-    var factory = new ConcurrentKafkaListenerContainerFactory<String, Product>();
-    factory.setConsumerFactory(productsConsumerFactory());
-    factory.setCommonErrorHandler(new DefaultErrorHandler((record, exception) -> {
-      log.error("Record consumption failed. {}", record, exception);
-      meterRegistry.counter(MetricsDefinition.PRODUCTS_ERROR).increment();
-    }, new FixedBackOff(50L, 1L)));
+  ConcurrentKafkaListenerContainerFactory<String, CloudEvent> binaryCloudEventContainerFactory() {
+    var factory = new ConcurrentKafkaListenerContainerFactory<String, CloudEvent>();
+    factory.setConsumerFactory(productsCEConsumerFactory());
+    factory.setCommonErrorHandler(new CustomKafkaErrorHandler());
     return factory;
   }
 

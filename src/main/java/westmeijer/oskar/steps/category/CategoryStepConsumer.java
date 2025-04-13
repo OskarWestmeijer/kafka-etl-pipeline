@@ -1,4 +1,4 @@
-package westmeijer.oskar.consumer;
+package westmeijer.oskar.steps.category;
 
 import static java.util.Objects.requireNonNull;
 
@@ -9,22 +9,20 @@ import io.cloudevents.core.data.PojoCloudEventData;
 import io.cloudevents.jackson.PojoCloudEventDataMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Validator;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import westmeijer.oskar.config.kafka.MetricsDefinition;
-import westmeijer.oskar.model.Product;
+import westmeijer.oskar.service.model.Product;
+import westmeijer.oskar.steps.StepConsumer;
+import westmeijer.oskar.steps.Steps.Topics;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class ProductsCEStructuredConsumer {
-
-  @Getter
-  private Product latestMsg;
+public class CategoryStepConsumer implements StepConsumer {
 
   private final Validator validator;
 
@@ -32,9 +30,12 @@ public class ProductsCEStructuredConsumer {
 
   private final MeterRegistry meterRegistry;
 
-  @KafkaListener(topics = "${kafka.servers.products.consumers.products-ce-structured.topic-name}",
-      containerFactory = "productsCEStructuredContainerFactory")
-  public void listenToCEStructuredProducts(ConsumerRecord<String, CloudEvent> message) {
+  private final CategoryStepProcessor categoryStepProcessor;
+
+  @KafkaListener(topics = Topics.CATEGORY,
+      containerFactory = "binaryCloudEventContainerFactory")
+  @Override
+  public void consume(ConsumerRecord<String, CloudEvent> message) {
     var cloudEvent = message.value();
     log.info("Received message: {}", cloudEvent);
 
@@ -49,12 +50,8 @@ public class ProductsCEStructuredConsumer {
       throw new IllegalArgumentException(validationErrors.toString());
     }
 
-    latestMsg = product;
-    meterRegistry.counter(MetricsDefinition.PRODUCTS_CE_STRUCTURED_CONSUMED).increment();
-  }
-
-  public void clearLastMessage() {
-    latestMsg = null;
+    categoryStepProcessor.process(product);
+    meterRegistry.counter(MetricsDefinition.PRICE_ASSIGNED).increment();
   }
 
 }
