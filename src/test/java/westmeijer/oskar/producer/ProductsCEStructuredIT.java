@@ -18,8 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
-import westmeijer.oskar.consumer.ProductsCEStructuredConsumer;
+import westmeijer.oskar.steps.price.PriceStepConsumer;
 import westmeijer.oskar.model.Product;
+import westmeijer.oskar.steps.price.PriceStepProducer;
 
 @SpringBootTest
 @DirtiesContext
@@ -28,10 +29,10 @@ public class ProductsCEStructuredIT {
 
   private static final Logger log = LoggerFactory.getLogger(ProductsCEStructuredIT.class);
   @Autowired
-  private ProductsCEStructuredProducer producer;
+  private PriceStepProducer producer;
 
   @Autowired
-  private ProductsCEStructuredConsumer consumer;
+  private PriceStepConsumer consumer;
 
   @Autowired
   private MeterRegistry meterRegistry;

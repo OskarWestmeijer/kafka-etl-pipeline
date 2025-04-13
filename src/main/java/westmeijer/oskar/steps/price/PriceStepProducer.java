@@ -1,4 +1,4 @@
-package westmeijer.oskar.producer;
+package westmeijer.oskar.steps.price;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,16 +17,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import westmeijer.oskar.model.Product;
+import westmeijer.oskar.steps.StepProducer;
 
 @Slf4j
 @Component
-public class ProductsCEStructuredProducer {
+public class PriceStepProducer implements StepProducer {
 
   private final String productsCEStructuredTopic;
   private final KafkaTemplate<String, CloudEvent> productCEStructuredKafkaTemplate;
   private final ObjectMapper objectMapper;
 
-  public ProductsCEStructuredProducer(
+  public PriceStepProducer(
       @Value(value = "${kafka.servers.products.consumers.products-ce-structured.topic-name}") String productsCEStructuredTopic,
       @Qualifier(value = "productsCEStructuredKafkaTemplate") KafkaTemplate<String, CloudEvent> productCEStructuredKafkaTemplate,
       ObjectMapper objectMapper) {
@@ -40,7 +41,8 @@ public class ProductsCEStructuredProducer {
       .withType("products-ce-structured")
       .withDataContentType("application/cloudevents+json");
 
-  public void sendMessage(Product product) {
+  @Override
+  public void produce(Product product) {
     Objects.requireNonNull(product);
     log.info("Producing to topic: {}, message: {}", productsCEStructuredTopic, product);
     String productJson;

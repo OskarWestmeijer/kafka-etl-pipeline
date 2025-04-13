@@ -14,7 +14,6 @@ import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCTS_ERROR;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.SneakyThrows;
 import org.awaitility.Durations;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import westmeijer.oskar.config.kafka.MetricsDefinition;
-import westmeijer.oskar.consumer.ProductsCEStructuredConsumer;
+import westmeijer.oskar.steps.price.PriceStepConsumer;
 import westmeijer.oskar.consumer.ProductsConsumer;
 import westmeijer.oskar.model.Product;
 
@@ -45,7 +44,7 @@ public class ProductsControllerIT {
   private ProductsConsumer productsConsumer;
 
   @Autowired
-  private ProductsCEStructuredConsumer productsCEStructuredConsumer;
+  private PriceStepConsumer priceTopicConsumer;
 
   @BeforeEach
   public void init() {
@@ -55,7 +54,7 @@ public class ProductsControllerIT {
     meterRegistry.counter(PRODUCTS_CE_STRUCTURED_CONSUMED).count();
     meterRegistry.counter(PRODUCTS_CE_STRUCTURED_ERROR).count();
     productsConsumer.clearLastMessage();
-    productsCEStructuredConsumer.clearLastMessage();
+    priceTopicConsumer.clearLastMessage();
   }
 
   @Test
@@ -84,7 +83,7 @@ public class ProductsControllerIT {
 
     await().atMost(Durations.TEN_SECONDS).untilAsserted(() -> {
       then(expectedProduct).isEqualTo(productsConsumer.getLatestMsg());
-      then(expectedProduct).isEqualTo(productsCEStructuredConsumer.getLatestMsg());
+      then(expectedProduct).isEqualTo(priceTopicConsumer.getLatestMsg());
       then(meterRegistry.get(MetricsDefinition.PRODUCTS_CONSUMED).counter().count()).isEqualTo(1d);
       then(meterRegistry.get(MetricsDefinition.PRODUCTS_CE_STRUCTURED_CONSUMED).counter().count()).isEqualTo(1d);
     });

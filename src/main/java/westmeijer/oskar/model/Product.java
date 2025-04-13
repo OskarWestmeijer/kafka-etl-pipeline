@@ -1,16 +1,19 @@
 package westmeijer.oskar.model;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Objects;
+import lombok.Builder;
+import org.apache.commons.lang3.ObjectUtils;
 
-public record Product(@Positive
-                      @NotNull
-                      Integer id,
+@Builder(toBuilder = true)
+public record Product(Integer id,
+                      String name,
+                      String category,
+                      BigDecimal price) implements Serializable {
 
-                      @NotEmpty(message = "Name cannot be empty.")
-                      @NotNull(message = "Name cannot be null.")
-                      String name) implements Serializable {
-
+  public Product {
+    Objects.requireNonNull(id, "id cannot be null");
+    ObjectUtils.requireNonEmpty(name, "name cannot be null or empty");
+  }
 }

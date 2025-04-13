@@ -20,18 +20,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import westmeijer.oskar.model.Product;
+import westmeijer.oskar.steps.price.PriceStepConsumer;
 
 @ExtendWith(MockitoExtension.class)
-public class ProductsCEStructuredConsumerTest {
+public class PriceStepConsumerTest {
 
   private final MeterRegistry meterRegistry = new SimpleMeterRegistry();
   private final Validator validator = mock(Validator.class);
   private final ObjectMapper objectMapper = new ObjectMapper();
-  private ProductsCEStructuredConsumer productsConsumer;
+  private PriceStepConsumer productsConsumer;
 
   @BeforeEach
   void setup() {
-    productsConsumer = new ProductsCEStructuredConsumer(validator, objectMapper, meterRegistry);
+    productsConsumer = new PriceStepConsumer(validator, objectMapper, meterRegistry);
     meterRegistry.clear();
     productsConsumer.clearLastMessage();
   }

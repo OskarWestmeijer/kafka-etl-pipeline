@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import westmeijer.oskar.model.Product;
 
 @ExtendWith(MockitoExtension.class)
-public class ProductsConsumerTest {
+public class ProductsStepConsumerTest {
 
 
   private final MeterRegistry meterRegistry = new SimpleMeterRegistry();
