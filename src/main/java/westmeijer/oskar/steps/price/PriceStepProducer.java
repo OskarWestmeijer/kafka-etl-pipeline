@@ -1,10 +1,10 @@
 package westmeijer.oskar.steps.price;
 
+import static westmeijer.oskar.steps.CloudEventMetadata.ceEventTemplate;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudevents.CloudEvent;
-import io.cloudevents.core.builder.CloudEventBuilder;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -26,11 +26,6 @@ public class PriceStepProducer implements StepProducer {
   private final Steps step = Steps.PRICE_ASSIGNMENT;
   private final KafkaTemplate<String, CloudEvent> binaryCloudEventsKafkaTemplate;
   private final ObjectMapper objectMapper;
-
-  private final CloudEventBuilder ceEventTemplate = CloudEventBuilder.v1()
-      .withSource(URI.create("https://oskar-westmeijer.com"))
-      .withType("products-ce-structured")
-      .withDataContentType("application/cloudevents+json");
 
   public PriceStepProducer(
       @Qualifier(value = "binaryCloudEventsKafkaTemplate")

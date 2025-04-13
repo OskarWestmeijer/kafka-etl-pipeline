@@ -6,9 +6,11 @@ import io.cloudevents.core.format.EventDeserializationException;
 import io.cloudevents.kafka.impl.KafkaBinaryMessageReaderImpl;
 import io.cloudevents.kafka.impl.KafkaHeaders;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Deserializer;
 
+@Slf4j
 public class CustomBinaryCloudEventDeserializer implements Deserializer<CloudEvent> {
 
   @Override

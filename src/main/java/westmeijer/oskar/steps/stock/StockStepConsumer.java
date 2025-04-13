@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import westmeijer.oskar.config.kafka.MetricsDefinition;
 import westmeijer.oskar.service.model.Product;
 import westmeijer.oskar.steps.StepConsumer;
+import westmeijer.oskar.steps.Steps.Topics;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,7 +32,7 @@ public class StockStepConsumer implements StepConsumer {
 
   private final StockStepProcessor stockStepProcessor;
 
-  @KafkaListener(topics = "${kafka.servers.products.steps.stock-assignment.topic-name}",
+  @KafkaListener(topics = Topics.STOCK,
       containerFactory = "binaryCloudEventContainerFactory")
   public void consume(ConsumerRecord<String, CloudEvent> message) {
     log.info("Received message from products topic. key: {}, value: {}, message: {}", message.key(), message.value(), message);

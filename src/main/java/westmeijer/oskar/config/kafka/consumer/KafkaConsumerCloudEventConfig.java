@@ -39,14 +39,12 @@ public class KafkaConsumerCloudEventConfig {
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
     props.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
-    props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, CustomBinaryCloudEventDeserializer.class);
-
-    var binaryCloudEventDeserializer = new CustomBinaryCloudEventDeserializer();
+    props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, CloudEventDeserializer.class);
 
     return new DefaultKafkaConsumerFactory<>(
         props,
         new StringDeserializer(),
-        binaryCloudEventDeserializer
+        new CloudEventDeserializer()
     );
   }
 

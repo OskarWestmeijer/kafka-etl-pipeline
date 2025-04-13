@@ -1,5 +1,7 @@
 package westmeijer.oskar.service;
 
+import static westmeijer.oskar.steps.CloudEventMetadata.ceEventTemplate;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudevents.CloudEvent;
@@ -26,11 +28,6 @@ public class ProductsService {
   private final Steps initialStep = Steps.CATEGORY_ASSIGNMENT;
   private final KafkaTemplate<String, CloudEvent> binaryCloudEventsKafkaTemplate;
   private final ObjectMapper objectMapper;
-
-  private final CloudEventBuilder ceEventTemplate = CloudEventBuilder.v1()
-      .withSource(URI.create("https://oskar-westmeijer.com"))
-      .withType("products-ce-binary")
-      .withDataContentType("application/cloudevents+json");
 
   public void startProductProcessing(Product product) {
     Objects.requireNonNull(product);
