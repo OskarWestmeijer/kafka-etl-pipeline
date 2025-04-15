@@ -29,7 +29,7 @@ dependencies {
 
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'org.apache.commons:commons-lang3:3.17.0'
-    implementation 'com.google.guava:guava:33.4.7-jre'
+    implementation 'com.google.guava:guava:33.4.8-jre'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
