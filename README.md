@@ -40,6 +40,10 @@ Publish message.
 curl -X POST localhost:8080/products -H "Content-Type: application/json" -d '{"id":1234,"name":"Effective Java"}'
 ```
 
+### Update Gradle Wrapper
+
+`./gradlew wrapper --gradle-version latest`
+
 ### Monitoring
 
 - [Kafka UI](http://localhost:8081)

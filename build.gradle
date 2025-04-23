@@ -10,8 +10,8 @@ group 'westmeijer.oskar'
 version '1.0.0'
 
 java {
-    sourceCompatibility = '21'
-    targetCompatibility = '21'
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 repositories {
@@ -36,25 +36,13 @@ dependencies {
     testImplementation 'org.awaitility:awaitility:4.3.0'
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.release.set(21)
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
-jacoco {
-    toolVersion = "0.8.11"
-}
-
 test {
+    useJUnitPlatform()
     finalizedBy jacocoTestReport
 }
 
 jacocoTestReport {
     dependsOn test
-
     reports {
         xml.required.set(true)
         csv.required.set(true)

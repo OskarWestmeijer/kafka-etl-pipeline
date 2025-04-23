@@ -1,0 +1,15 @@
+name: nightly-build
+
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+
+jobs:
+  backend-build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/backend-build-and-test
+        with:
+          code-cov: ${{ secrets.CODECOV_TOKEN }}
