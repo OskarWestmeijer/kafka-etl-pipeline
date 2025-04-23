@@ -1,6 +1,7 @@
 # kafka-messaging
 
 ![main branch](https://github.com/OskarWestmeijer/kafka-messaging/actions/workflows/main-build-test-release.yml/badge.svg)
+![main branch](https://github.com/OskarWestmeijer/kafka-messaging/actions/workflows/nightly-build.yml/badge.svg)
 [![codecov](https://codecov.io/github/OskarWestmeijer/kafka-messaging/branch/main/graph/badge.svg?token=CA6XMRS0WS)](https://codecov.io/github/OskarWestmeijer/kafka-messaging)
 
 Explores Kafka messaging with Spring-Boot.
