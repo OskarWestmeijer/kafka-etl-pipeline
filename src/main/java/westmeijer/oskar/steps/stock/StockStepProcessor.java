@@ -1,29 +1,24 @@
 package westmeijer.oskar.steps.stock;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import westmeijer.oskar.config.kafka.MetricsDefinition;
 import westmeijer.oskar.service.model.Product;
-import westmeijer.oskar.steps.StepProcessor;
+import westmeijer.oskar.steps.Steps;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
-class StockStepProcessor implements StepProcessor {
+class StockStepProcessor extends StepProcessorAbstract {
 
-  private final MeterRegistry meterRegistry;
-  private final StockStepHandOff stockStepHandOff;
+  public StockStepProcessor(MeterRegistry meterRegistry, StockStepHandOff stockStepHandOff) {
+    super(meterRegistry, stockStepHandOff, Steps.STOCK_ASSIGNMENT);
+  }
 
   @Override
-  public void process(Product product) {
-    var processedProduct = product.toBuilder()
+  public Product enrich(Product product) {
+    return product.toBuilder()
         .stock(17)
         .build();
-    log.info("Processed product. product: {}", processedProduct);
-    stockStepHandOff.produce(product);
-    meterRegistry.counter(MetricsDefinition.STOCK_ASSIGNED).increment();
   }
 
 }
