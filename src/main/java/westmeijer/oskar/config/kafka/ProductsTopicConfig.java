@@ -25,24 +25,32 @@ public class ProductsTopicConfig {
   }
 
   @Bean
-  public NewTopic categoryAssignmentTopic() {
-    return TopicBuilder.name(Topics.CATEGORY)
+  public NewTopic categoryAssignedTopic() {
+    return TopicBuilder.name(Topics.CATEGORY_ASSIGNED)
         .partitions(1)
         .replicas(1)
         .build();
   }
 
   @Bean
-  public NewTopic priceAssignmentTopic() {
-    return TopicBuilder.name(Topics.PRICE)
+  public NewTopic priceAssignedTopic() {
+    return TopicBuilder.name(Topics.PRICE_ASSIGNED)
         .partitions(1)
         .replicas(1)
         .build();
   }
 
   @Bean
-  public NewTopic stockAssignmentTopic() {
-    return TopicBuilder.name(Topics.STOCK)
+  public NewTopic stockAssignedTopic() {
+    return TopicBuilder.name(Topics.STOCK_ASSIGNED)
+        .partitions(1)
+        .replicas(1)
+        .build();
+  }
+
+  @Bean
+  public NewTopic productReceivedTopic() {
+    return TopicBuilder.name(Topics.PRODUCT_RECEIVED)
         .partitions(1)
         .replicas(1)
         .build();

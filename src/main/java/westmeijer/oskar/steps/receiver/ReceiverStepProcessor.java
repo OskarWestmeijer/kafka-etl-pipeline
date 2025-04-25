@@ -1,4 +1,4 @@
-package westmeijer.oskar.steps.stock;
+package westmeijer.oskar.steps.receiver;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
@@ -11,19 +11,14 @@ import westmeijer.oskar.steps.StepProcessor;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-class StockStepProcessor implements StepProcessor {
+public class ReceiverStepProcessor implements StepProcessor {
 
   private final MeterRegistry meterRegistry;
-  private final StockStepHandOff stockStepHandOff;
+  private final ReceiverStepHandOff receiverStepHandOff;
 
   @Override
   public void process(Product product) {
-    var processedProduct = product.toBuilder()
-        .stock(17)
-        .build();
-    log.info("Processed product. product: {}", processedProduct);
-    stockStepHandOff.produce(product);
-    meterRegistry.counter(MetricsDefinition.STOCK_ASSIGNED).increment();
+    receiverStepHandOff.produce(product);
+    meterRegistry.counter(MetricsDefinition.PRODUCT_RECEIVED).increment();
   }
-
 }

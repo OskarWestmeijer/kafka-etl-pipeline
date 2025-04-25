@@ -1,4 +1,4 @@
-package westmeijer.oskar.steps.stock;
+package westmeijer.oskar.steps.category;
 
 import static westmeijer.oskar.steps.CloudEventMetadata.ceEventTemplate;
 
@@ -16,17 +16,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import westmeijer.oskar.service.model.Product;
-import westmeijer.oskar.steps.StepProducer;
+import westmeijer.oskar.steps.StepHandOff;
 import westmeijer.oskar.steps.Steps;
 
 @Slf4j
 @Component
-public class StockStepProducer implements StepProducer {
+class CategoryStepHandOff implements StepHandOff {
 
   private final KafkaTemplate<String, CloudEvent> binaryCloudEventsKafkaTemplate;
   private final ObjectMapper objectMapper;
 
-  public StockStepProducer(
+  public CategoryStepHandOff(
       @Qualifier(value = "binaryCloudEventsKafkaTemplate")
       KafkaTemplate<String, CloudEvent> binaryCloudEventsKafkaTemplate,
       ObjectMapper objectMapper) {
@@ -52,12 +52,12 @@ public class StockStepProducer implements StepProducer {
         .withData(productJson.getBytes(StandardCharsets.UTF_8))
         .build();
 
-    binaryCloudEventsKafkaTemplate.send(getOutgoingTopic().toString(), String.valueOf(product.id()), productCE);
+    binaryCloudEventsKafkaTemplate.send(getOutgoingTopic(), String.valueOf(product.id()), productCE);
   }
 
   @Override
   public String getOutgoingTopic() {
-    return Steps.STOCK_ASSIGNMENT.outputTopic;
+    return Steps.CATEGORY_ASSIGNMENT.outputTopic;
   }
 
 }

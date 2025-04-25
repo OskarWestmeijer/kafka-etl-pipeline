@@ -10,6 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class MetricsDefinition {
+  // TODO: put this in the Steps configuration
+
+  public static final String PRODUCT_RECEIVED = "product.received";
+  public static final String PRODUCT_RECEIVED_ERROR = "product.received.error";
 
   public static final String CATEGORY_ASSIGNED = "category.assigned";
   public static final String CATEGORY_ERROR = "category.error";
@@ -19,6 +23,10 @@ public class MetricsDefinition {
 
   public static final String STOCK_ASSIGNED = "stock.assigned";
   public static final String STOCK_ERROR = "stock.error";
+
+  public static final String PRODUCT_FINALIZED = "product.finalized";
+  public static final String PRODUCT_FINALIZED_ERROR = "product.finalized.error";
+
 
   private final MeterRegistry meterRegistry;
 

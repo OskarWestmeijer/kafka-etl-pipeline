@@ -2,10 +2,11 @@ package westmeijer.oskar.steps;
 
 public enum Steps {
 
-  KICK_OFF(null, Topics.CATEGORY),
-  CATEGORY_ASSIGNMENT(Topics.CATEGORY, Topics.PRICE),
-  PRICE_ASSIGNMENT(Topics.PRICE, Topics.STOCK),
-  STOCK_ASSIGNMENT(Topics.STOCK, null);
+  PRODUCT_RECEIVER(null, Topics.PRODUCT_RECEIVED),
+  CATEGORY_ASSIGNMENT(Topics.PRODUCT_RECEIVED, Topics.CATEGORY_ASSIGNED),
+  PRICE_ASSIGNMENT(Topics.CATEGORY_ASSIGNED, Topics.PRICE_ASSIGNED),
+  STOCK_ASSIGNMENT(Topics.PRICE_ASSIGNED, Topics.STOCK_ASSIGNED),
+  PRODUCT_FINALIZER(Topics.STOCK_ASSIGNED, null);
 
   public final String inputTopic;
   public final String outputTopic;
@@ -17,9 +18,10 @@ public enum Steps {
 
   public static class Topics {
 
-    public static final String CATEGORY = "category-assignment";
-    public static final String PRICE = "price-assignment";
-    public static final String STOCK = "stock-assignment";
+    public static final String PRODUCT_RECEIVED = "product-received";
+    public static final String PRICE_ASSIGNED = "price-assigned";
+    public static final String CATEGORY_ASSIGNED = "category-assigned";
+    public static final String STOCK_ASSIGNED = "stock-assigned";
   }
 
 }

@@ -10,6 +10,10 @@ import static westmeijer.oskar.config.kafka.MetricsDefinition.CATEGORY_ASSIGNED;
 import static westmeijer.oskar.config.kafka.MetricsDefinition.CATEGORY_ERROR;
 import static westmeijer.oskar.config.kafka.MetricsDefinition.PRICE_ASSIGNED;
 import static westmeijer.oskar.config.kafka.MetricsDefinition.PRICE_ERROR;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCT_FINALIZED;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCT_FINALIZED_ERROR;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCT_RECEIVED;
+import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCT_RECEIVED_ERROR;
 import static westmeijer.oskar.config.kafka.MetricsDefinition.STOCK_ASSIGNED;
 import static westmeijer.oskar.config.kafka.MetricsDefinition.STOCK_ERROR;
 
@@ -25,7 +29,6 @@ import org.springframework.http.MediaType;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import westmeijer.oskar.config.kafka.MetricsDefinition;
 import westmeijer.oskar.controller.model.ProductRequest;
 
 @SpringBootTest
@@ -44,13 +47,17 @@ public class ProductsControllerIT {
   public void init() {
     meterRegistry.clear();
 
+    meterRegistry.counter(PRODUCT_RECEIVED).count();
     meterRegistry.counter(CATEGORY_ASSIGNED).count();
     meterRegistry.counter(PRICE_ASSIGNED).count();
     meterRegistry.counter(STOCK_ASSIGNED).count();
+    meterRegistry.counter(PRODUCT_FINALIZED).count();
 
+    meterRegistry.counter(PRODUCT_RECEIVED_ERROR).count();
     meterRegistry.counter(CATEGORY_ERROR).count();
     meterRegistry.counter(PRICE_ERROR).count();
     meterRegistry.counter(STOCK_ERROR).count();
+    meterRegistry.counter(PRODUCT_FINALIZED_ERROR).count();
   }
 
   @Test
@@ -77,14 +84,17 @@ public class ProductsControllerIT {
         .andExpect(status().isAccepted());
 
     await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
-      then(meterRegistry.get(MetricsDefinition.CATEGORY_ASSIGNED).counter().count()).isEqualTo(1d);
-      then(meterRegistry.get(MetricsDefinition.PRICE_ASSIGNED).counter().count()).isEqualTo(1d);
-      then(meterRegistry.get(MetricsDefinition.STOCK_ASSIGNED).counter().count()).isEqualTo(1d);
+      then(meterRegistry.get(PRODUCT_RECEIVED).counter().count()).isEqualTo(1d);
+      then(meterRegistry.get(CATEGORY_ASSIGNED).counter().count()).isEqualTo(1d);
+      then(meterRegistry.get(PRICE_ASSIGNED).counter().count()).isEqualTo(1d);
+      then(meterRegistry.get(STOCK_ASSIGNED).counter().count()).isEqualTo(1d);
+      then(meterRegistry.get(PRODUCT_FINALIZED).counter().count()).isEqualTo(1d);
 
-      then(meterRegistry.get(MetricsDefinition.CATEGORY_ERROR).counter().count()).isEqualTo(0d);
-      then(meterRegistry.get(MetricsDefinition.PRICE_ERROR).counter().count()).isEqualTo(0d);
-      then(meterRegistry.get(MetricsDefinition.STOCK_ERROR).counter().count()).isEqualTo(0d);
-
+      then(meterRegistry.get(PRODUCT_RECEIVED_ERROR).counter().count()).isEqualTo(0d);
+      then(meterRegistry.get(CATEGORY_ERROR).counter().count()).isEqualTo(0d);
+      then(meterRegistry.get(PRICE_ERROR).counter().count()).isEqualTo(0d);
+      then(meterRegistry.get(STOCK_ERROR).counter().count()).isEqualTo(0d);
+      then(meterRegistry.get(PRODUCT_FINALIZED_ERROR).counter().count()).isEqualTo(0d);
     });
 
   }
