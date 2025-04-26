@@ -2,7 +2,6 @@ package westmeijer.oskar.config.kafka.producer;
 
 import io.cloudevents.CloudEvent;
 import io.cloudevents.core.message.Encoding;
-import io.cloudevents.jackson.JsonFormat;
 import io.cloudevents.kafka.CloudEventSerializer;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,19 +19,20 @@ public class KafkaProducerCloudEventConfig {
   @Value(value = "${kafka.servers.products.bootstrap-server}")
   private String bootstrapAddress;
 
-  private ProducerFactory<String, CloudEvent> CloudEventsProducerFactory(Encoding cloudEventEncoding) {
+  @Bean
+  ProducerFactory<String, CloudEvent> binaryCloudEventsProducerFactory() {
     Map<String, Object> configProps = new HashMap<>();
     configProps.put(org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     configProps.put(org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     configProps.put(org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, CloudEventSerializer.class);
-    configProps.put(CloudEventSerializer.ENCODING_CONFIG, cloudEventEncoding);
-    configProps.put(CloudEventSerializer.EVENT_FORMAT_CONFIG, JsonFormat.CONTENT_TYPE);
+    configProps.put(CloudEventSerializer.ENCODING_CONFIG, Encoding.BINARY);
     return new DefaultKafkaProducerFactory<>(configProps);
   }
 
   @Bean(value = "binaryCloudEventsKafkaTemplate")
-  public KafkaTemplate<String, CloudEvent> binaryCloudEventsKafkaTemplate() {
-    return new KafkaTemplate<>(CloudEventsProducerFactory(Encoding.BINARY));
+  KafkaTemplate<String, CloudEvent> binaryCloudEventsKafkaTemplate(
+      ProducerFactory<String, CloudEvent> binaryCloudEventsProducerFactory) {
+    return new KafkaTemplate<>(binaryCloudEventsProducerFactory);
   }
 
 }

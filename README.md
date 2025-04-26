@@ -27,15 +27,9 @@ docker-compose up -d
 ./gradlew bootRun
 ```
 
-### Prepared requests
+#### Prepared requests
 
-Verify application is available.
-
-``` bash
-curl -X GET localhost:8080/ping
-```
-
-Publish message.
+Publish message by curl. Visit ´http://localhost:8081´ to review the messages in the kafka-ui.
 
 ``` bash
 curl -X POST localhost:8080/products -H "Content-Type: application/json" -d '{"id":1234,"name":"Effective Java"}'

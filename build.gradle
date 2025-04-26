@@ -6,8 +6,8 @@ plugins {
     id 'jacoco'
 }
 
-group 'westmeijer.oskar'
-version '1.0.0'
+group = 'westmeijer.oskar'
+version = '1.0.0'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21

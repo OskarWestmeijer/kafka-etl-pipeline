@@ -22,7 +22,7 @@ class StockStepProcessor implements StepProcessor {
         .stock(17)
         .build();
     log.info("Processed product. product: {}", processedProduct);
-    stockStepHandOff.produce(product);
+    stockStepHandOff.produce(processedProduct);
     meterRegistry.counter(MetricsDefinition.STOCK_ASSIGNED).increment();
   }
 
