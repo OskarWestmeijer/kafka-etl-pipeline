@@ -18,6 +18,20 @@ runs:
         chmod +x gradlew 
         ./gradlew clean check
 
+    - name: Upload test report on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-report
+        path: build/reports/tests/test
+
+    - name: Upload Gradle problems report
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: gradle-problems-report
+        path: build/reports/problems
+
     - name: Upload JaCoCo coverage report
       uses: actions/upload-artifact@v4
       with:
