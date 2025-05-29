@@ -10,9 +10,7 @@
   },
   "response": {
     "status": 200,
-    "jsonBody": {
-      "category": "Comic"
-    },
+    "bodyFileName": "category_response.json",
     "headers": {
       "Content-Type": "application/json"
     }

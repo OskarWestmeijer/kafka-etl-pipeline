@@ -17,9 +17,12 @@ import static westmeijer.oskar.config.kafka.MetricsDefinition.PRODUCT_RECEIVED_E
 import static westmeijer.oskar.config.kafka.MetricsDefinition.STOCK_ASSIGNED;
 import static westmeijer.oskar.config.kafka.MetricsDefinition.STOCK_ERROR;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +46,18 @@ public class ProductsControllerIT {
   @Autowired
   private MeterRegistry meterRegistry;
 
+  private WireMockServer wireMockServer;
+
   @BeforeEach
   public void init() {
-    meterRegistry.clear();
+    wireMockServer = new WireMockServer(
+        WireMockConfiguration.options()
+            .port(9000)
+            .usingFilesUnderClasspath("wiremock")
+    );
+    wireMockServer.start();
 
+    meterRegistry.clear();
     meterRegistry.counter(PRODUCT_RECEIVED).count();
     meterRegistry.counter(CATEGORY_ASSIGNED).count();
     meterRegistry.counter(PRICE_ASSIGNED).count();
@@ -58,6 +69,11 @@ public class ProductsControllerIT {
     meterRegistry.counter(PRICE_ERROR).count();
     meterRegistry.counter(STOCK_ERROR).count();
     meterRegistry.counter(PRODUCT_FINALIZED_ERROR).count();
+  }
+
+  @AfterEach
+  void tearDown() {
+    wireMockServer.stop();
   }
 
   @Test

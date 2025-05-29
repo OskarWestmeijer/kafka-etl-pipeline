@@ -15,7 +15,7 @@ runs:
 
     - shell: bash
       run: |
-        chmod +x gradlew 
+        chmod +x gradlew
         ./gradlew clean check
 
     - name: Upload test report on failure
