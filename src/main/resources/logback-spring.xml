@@ -9,12 +9,10 @@
         </encoder>
     </appender>
 
-    <!-- LOG everything at INFO level -->
     <root level="error">
         <appender-ref ref="Console"/>
     </root>
 
-    <!-- LOG "westmeijer.oskar*" at INFO level -->
     <logger name="westmeijer.oskar" level="info" additivity="false">
         <appender-ref ref="Console"/>
     </logger>

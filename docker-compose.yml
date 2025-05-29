@@ -32,6 +32,13 @@ services:
       # Address where to connect
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
 
+  wiremock:
+    image: wiremock/wiremock:3.13.0
+    ports:
+      - "9000:8080"
+    volumes:
+      - ./src/test/resources/wiremock/mappings:/home/wiremock/mappings
+
   prometheus:
     image: prom/prometheus:v2.42.0
     container_name: prometheus

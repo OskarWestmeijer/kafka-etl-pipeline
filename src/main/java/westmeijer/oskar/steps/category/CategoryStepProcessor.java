@@ -15,11 +15,13 @@ class CategoryStepProcessor implements StepProcessor {
 
   private final MeterRegistry meterRegistry;
   private final CategoryStepHandOff categoryStepProducer;
+  private final CategoryHttpClient categoryHttpClient;
 
   @Override
   public void process(Product product) {
+    var categoryResponse = categoryHttpClient.getCategory(product.id());
     var processedProduct = product.toBuilder()
-        .category("Books")
+        .category(categoryResponse.category())
         .build();
     log.info("Processed product. product: {}", processedProduct);
     categoryStepProducer.produce(processedProduct);

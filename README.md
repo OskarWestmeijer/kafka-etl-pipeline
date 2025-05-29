@@ -35,6 +35,12 @@ Publish message by curl. Visit ´http://localhost:8081´ to review the messages 
 curl -X POST localhost:8080/products -H "Content-Type: application/json" -d '{"id":1234,"name":"Effective Java"}'
 ```
 
+Request Wiremock
+
+``` bash
+curl -X GET localhost:9000/category?productId=1 -H "Content-Type: application/json"
+```
+
 ### Update Gradle Wrapper
 
 `./gradlew wrapper --gradle-version latest`
