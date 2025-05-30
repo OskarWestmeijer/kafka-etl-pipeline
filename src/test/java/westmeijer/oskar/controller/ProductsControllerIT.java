@@ -5,6 +5,7 @@ import static org.awaitility.Awaitility.await;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static westmeijer.oskar.config.kafka.MetricsDefinition.CATEGORY_ASSIGNED;
 import static westmeijer.oskar.config.kafka.MetricsDefinition.CATEGORY_ERROR;
@@ -24,7 +25,10 @@ import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,6 +45,7 @@ import westmeijer.oskar.controller.model.ProductRequest;
 @DirtiesContext
 @EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
 @Import(EmbeddedPostgresConfig.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ProductsControllerIT {
 
   @Autowired
@@ -50,6 +55,8 @@ public class ProductsControllerIT {
   private MeterRegistry meterRegistry;
 
   private WireMockServer wireMockServer;
+
+  private final Integer testProductId = 1234;
 
   @BeforeEach
   public void init() {
@@ -80,6 +87,7 @@ public class ProductsControllerIT {
   }
 
   @Test
+  @Order(1)
   @SneakyThrows
   void shouldPingPong() {
     mockMvc.perform(get("/ping"))
@@ -89,9 +97,18 @@ public class ProductsControllerIT {
   }
 
   @Test
+  @Order(2)
+  @SneakyThrows
+  void shouldNotHaveProduct() {
+    mockMvc.perform(get("/products/%s".formatted(testProductId)))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @Order(3)
   @SneakyThrows
   void shouldRunPipeline() {
-    var productRequest = new ProductRequest(1234, "Effective Java");
+    var productRequest = new ProductRequest(testProductId, "Effective Java");
 
     mockMvc.perform(post("/products")
             .contentType(MediaType.APPLICATION_JSON)
@@ -116,6 +133,23 @@ public class ProductsControllerIT {
       then(meterRegistry.get(PRODUCT_FINALIZED_ERROR).counter().count()).isEqualTo(0d);
     });
 
+  }
+
+  @Test
+  @Order(4)
+  @SneakyThrows
+  void shouldHaveFinalizedProduct() {
+    mockMvc.perform(get("/products/%s".formatted(testProductId)))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.id").value(testProductId))
+        .andExpect(jsonPath("$.name").value("Effective Java"))
+        .andExpect(jsonPath("$.category").value("Comic"))
+        .andExpect(jsonPath("$.price").value("10.99"))
+        .andExpect(jsonPath("$.stock").value("17"))
+        .andExpect(jsonPath("$.createdAt").isNotEmpty())
+        .andExpect(jsonPath("$.lastModifiedAt").isNotEmpty())
+        .andExpect(jsonPath("$.lastFinalizedAt").isNotEmpty());
   }
 
 }
