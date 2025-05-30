@@ -1,8 +1,8 @@
 # kafka-etl-pipeline
 
-![main branch](https://github.com/OskarWestmeijer/kafka-messaging/actions/workflows/main-build-test-release.yml/badge.svg)
-![main branch](https://github.com/OskarWestmeijer/kafka-messaging/actions/workflows/nightly-build.yml/badge.svg)
-[![codecov](https://codecov.io/github/OskarWestmeijer/kafka-messaging/branch/main/graph/badge.svg?token=CA6XMRS0WS)](https://codecov.io/github/OskarWestmeijer/kafka-messaging)
+![main branch](https://github.com/OskarWestmeijer/kafka-etl-pipeline/actions/workflows/main-build-test-release.yml/badge.svg)
+![main branch](https://github.com/OskarWestmeijer/kafka-etl-pipeline/actions/workflows/nightly-build.yml/badge.svg)
+[![codecov](https://codecov.io/github/OskarWestmeijer/kafka-etl-pipeline/branch/main/graph/badge.svg?token=CA6XMRS0WS)](https://codecov.io/github/OskarWestmeijer/kafka-messaging)
 
 This service implements a Kafka-based ETL pipeline for product enrichment. The same product passes through multiple Kafka topics, with each
 step focused on a different enrichment task. At each stage, the service performs an HTTP call to gather additional data, updates the
