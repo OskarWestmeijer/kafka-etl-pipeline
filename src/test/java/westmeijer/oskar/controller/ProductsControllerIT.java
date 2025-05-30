@@ -5,6 +5,7 @@ import static org.awaitility.Awaitility.await;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static westmeijer.oskar.config.kafka.MetricsDefinition.CATEGORY_ASSIGNED;
 import static westmeijer.oskar.config.kafka.MetricsDefinition.CATEGORY_ERROR;
@@ -22,22 +23,23 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import westmeijer.oskar.IntegrationTest;
+import westmeijer.oskar.MetricsInitializer;
 import westmeijer.oskar.controller.model.ProductRequest;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@DirtiesContext
-@EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
+@IntegrationTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ProductsControllerIT {
 
   @Autowired
@@ -46,9 +48,16 @@ public class ProductsControllerIT {
   @Autowired
   private MeterRegistry meterRegistry;
 
-  private WireMockServer wireMockServer;
+  @Autowired
+  private MetricsInitializer metricsInitializer;
 
-  @BeforeEach
+  private static WireMockServer wireMockServer;
+
+  private final Integer testProductId = 1234;
+  private final String firstRunName = "Effective Java";
+  private final String secondRunName = "Effective Java 2nd edition";
+
+  @BeforeAll
   public void init() {
     wireMockServer = new WireMockServer(
         WireMockConfiguration.options()
@@ -56,27 +65,17 @@ public class ProductsControllerIT {
             .usingFilesUnderClasspath("wiremock")
     );
     wireMockServer.start();
-
     meterRegistry.clear();
-    meterRegistry.counter(PRODUCT_RECEIVED).count();
-    meterRegistry.counter(CATEGORY_ASSIGNED).count();
-    meterRegistry.counter(PRICE_ASSIGNED).count();
-    meterRegistry.counter(STOCK_ASSIGNED).count();
-    meterRegistry.counter(PRODUCT_FINALIZED).count();
-
-    meterRegistry.counter(PRODUCT_RECEIVED_ERROR).count();
-    meterRegistry.counter(CATEGORY_ERROR).count();
-    meterRegistry.counter(PRICE_ERROR).count();
-    meterRegistry.counter(STOCK_ERROR).count();
-    meterRegistry.counter(PRODUCT_FINALIZED_ERROR).count();
+    metricsInitializer.initCounters();
   }
 
-  @AfterEach
+  @AfterAll
   void tearDown() {
     wireMockServer.stop();
   }
 
   @Test
+  @Order(1)
   @SneakyThrows
   void shouldPingPong() {
     mockMvc.perform(get("/ping"))
@@ -86,9 +85,18 @@ public class ProductsControllerIT {
   }
 
   @Test
+  @Order(2)
   @SneakyThrows
-  void shouldRunPipeline() {
-    var productRequest = new ProductRequest(1234, "Effective Java");
+  void shouldNotHaveProduct() {
+    mockMvc.perform(get("/products/%s".formatted(testProductId)))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @Order(3)
+  @SneakyThrows
+  void shouldRunPipelineFirstTime() {
+    var productRequest = new ProductRequest(testProductId, firstRunName);
 
     mockMvc.perform(post("/products")
             .contentType(MediaType.APPLICATION_JSON)
@@ -113,6 +121,71 @@ public class ProductsControllerIT {
       then(meterRegistry.get(PRODUCT_FINALIZED_ERROR).counter().count()).isEqualTo(0d);
     });
 
+  }
+
+  @Test
+  @Order(4)
+  @SneakyThrows
+  void shouldHaveFinalizedProductFirstTime() {
+    mockMvc.perform(get("/products/%s".formatted(testProductId)))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.id").value(testProductId))
+        .andExpect(jsonPath("$.name").value(firstRunName))
+        .andExpect(jsonPath("$.category").value("Comic"))
+        .andExpect(jsonPath("$.price").value("10.99"))
+        .andExpect(jsonPath("$.stock").value("17"))
+        .andExpect(jsonPath("$.createdAt").isNotEmpty())
+        .andExpect(jsonPath("$.lastModifiedAt").isNotEmpty())
+        .andExpect(jsonPath("$.lastFinalizedAt").isNotEmpty());
+  }
+
+  @Test
+  @Order(5)
+  @SneakyThrows
+  void shouldRunPipelineSecondTime() {
+    var productRequest = new ProductRequest(testProductId, secondRunName);
+
+    mockMvc.perform(post("/products")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                   "id":%s,
+                   "name":"%s"
+                }""".formatted(productRequest.id(), productRequest.name())))
+        .andExpect(status().isAccepted());
+
+    await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
+      then(meterRegistry.get(PRODUCT_RECEIVED).counter().count()).isEqualTo(2d);
+      then(meterRegistry.get(CATEGORY_ASSIGNED).counter().count()).isEqualTo(2d);
+      then(meterRegistry.get(PRICE_ASSIGNED).counter().count()).isEqualTo(2d);
+      then(meterRegistry.get(STOCK_ASSIGNED).counter().count()).isEqualTo(2d);
+      then(meterRegistry.get(PRODUCT_FINALIZED).counter().count()).isEqualTo(2d);
+
+      then(meterRegistry.get(PRODUCT_RECEIVED_ERROR).counter().count()).isEqualTo(0d);
+      then(meterRegistry.get(CATEGORY_ERROR).counter().count()).isEqualTo(0d);
+      then(meterRegistry.get(PRICE_ERROR).counter().count()).isEqualTo(0d);
+      then(meterRegistry.get(STOCK_ERROR).counter().count()).isEqualTo(0d);
+      then(meterRegistry.get(PRODUCT_FINALIZED_ERROR).counter().count()).isEqualTo(0d);
+    });
+
+  }
+
+  @Test
+  @Order(6)
+  @SneakyThrows
+  void shouldHaveFinalizedProductSecondTime() {
+    mockMvc.perform(get("/products/%s".formatted(testProductId)))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.id").value(testProductId))
+        .andExpect(jsonPath("$.name").value(secondRunName))
+        .andExpect(jsonPath("$.category").value("Comic"))
+        .andExpect(jsonPath("$.price").value("10.99"))
+        .andExpect(jsonPath("$.stock").value("17"))
+        .andExpect(jsonPath("$.createdAt").isNotEmpty())
+        .andExpect(jsonPath("$.lastModifiedAt").isNotEmpty())
+        .andExpect(jsonPath("$.lastFinalizedAt").isNotEmpty());
   }
 
 }
