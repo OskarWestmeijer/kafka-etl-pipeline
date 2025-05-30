@@ -12,7 +12,7 @@ product, saves it to the database, and sends it to the next topic for further pr
 
 ```
 Java, Gradle & Spring-Boot
-Kafka & Cloud-Events
+Kafka, Cloud-Events & Postgres
 Github Actions
 ```
 
@@ -38,7 +38,7 @@ curl -X POST localhost:8080/products -H "Content-Type: application/json" -d '{"i
 ```
 
 ``` bash
-curl -X GET localhost:8080/products/1
+curl -X GET localhost:8080/products/1234
 ```
 
 Request Wiremock
