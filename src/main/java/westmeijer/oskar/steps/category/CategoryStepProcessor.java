@@ -19,7 +19,7 @@ class CategoryStepProcessor implements StepProcessor {
 
   @Override
   public void process(Product product) {
-    var categoryResponse = categoryHttpClient.getCategory(product.id());
+    var categoryResponse = categoryHttpClient.getCategories(product.id());
     var processedProduct = product.toBuilder()
         .category(categoryResponse.category())
         .build();

@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/categories",
+    "urlPath": "/stocks",
     "queryParameters": {
       "productId": {
         "matches": ".+"
@@ -10,7 +10,7 @@
   },
   "response": {
     "status": 200,
-    "bodyFileName": "category_response.json",
+    "bodyFileName": "stock_response.json",
     "headers": {
       "Content-Type": "application/json"
     }

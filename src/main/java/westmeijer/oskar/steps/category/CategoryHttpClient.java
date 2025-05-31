@@ -5,8 +5,8 @@ import org.springframework.web.service.annotation.GetExchange;
 
 public interface CategoryHttpClient {
 
-  @GetExchange(url = "/category")
-  CategoryResponse getCategory(@RequestParam("productId") Integer productId);
+  @GetExchange(url = "/categories")
+  CategoryResponse getCategories(@RequestParam("productId") Integer productId);
 
   record CategoryResponse(String category) {
 

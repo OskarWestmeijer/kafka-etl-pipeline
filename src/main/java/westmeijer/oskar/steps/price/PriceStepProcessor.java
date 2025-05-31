@@ -16,11 +16,13 @@ class PriceStepProcessor implements StepProcessor {
 
   private final PriceStepHandOff priceStepProducer;
   private final MeterRegistry meterRegistry;
+  private final PriceHttpClient priceHttpClient;
 
   @Override
   public void process(Product product) {
+    var priceResponse = priceHttpClient.getPrices(product.id());
     var processedProduct = product.toBuilder()
-        .price(BigDecimal.valueOf(10.99d))
+        .price(priceResponse.price())
         .build();
     log.info("Processed product. product: {}", processedProduct);
     priceStepProducer.produce(processedProduct);

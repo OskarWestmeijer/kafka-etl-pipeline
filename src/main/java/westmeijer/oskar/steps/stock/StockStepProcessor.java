@@ -15,11 +15,13 @@ class StockStepProcessor implements StepProcessor {
 
   private final MeterRegistry meterRegistry;
   private final StockStepHandOff stockStepHandOff;
+  private final StockHttpClient stockHttpClient;
 
   @Override
   public void process(Product product) {
+    var stockResponse = stockHttpClient.getStocks(product.id());
     var processedProduct = product.toBuilder()
-        .stock(17)
+        .stock(stockResponse.stock())
         .build();
     log.info("Processed product. product: {}", processedProduct);
     stockStepHandOff.produce(processedProduct);

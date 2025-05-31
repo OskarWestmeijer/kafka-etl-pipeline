@@ -53,9 +53,8 @@ public class ProductsControllerIT {
 
   private static WireMockServer wireMockServer;
 
-  private final Integer testProductId = 1234;
-  private final String firstRunName = "Effective Java";
-  private final String secondRunName = "Effective Java 2nd edition";
+  private final ProductRequest firstRequest = new ProductRequest(1234, "Asterix & Obelix");
+  private final ProductRequest secondRequest = new ProductRequest(1234, "Asterix & Obelix - 2nd edition");
 
   @BeforeAll
   public void init() {
@@ -88,7 +87,7 @@ public class ProductsControllerIT {
   @Order(2)
   @SneakyThrows
   void shouldNotHaveProduct() {
-    mockMvc.perform(get("/products/%s".formatted(testProductId)))
+    mockMvc.perform(get("/products/%s".formatted(firstRequest.id())))
         .andExpect(status().isNotFound());
   }
 
@@ -96,15 +95,13 @@ public class ProductsControllerIT {
   @Order(3)
   @SneakyThrows
   void shouldRunPipelineFirstTime() {
-    var productRequest = new ProductRequest(testProductId, firstRunName);
-
     mockMvc.perform(post("/products")
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
                    "id":%s,
                    "name":"%s"
-                }""".formatted(productRequest.id(), productRequest.name())))
+                }""".formatted(firstRequest.id(), firstRequest.name())))
         .andExpect(status().isAccepted());
 
     await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
@@ -127,14 +124,14 @@ public class ProductsControllerIT {
   @Order(4)
   @SneakyThrows
   void shouldHaveFinalizedProductFirstTime() {
-    mockMvc.perform(get("/products/%s".formatted(testProductId)))
+    mockMvc.perform(get("/products/%s".formatted(firstRequest.id())))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id").value(testProductId))
-        .andExpect(jsonPath("$.name").value(firstRunName))
+        .andExpect(jsonPath("$.id").value(firstRequest.id()))
+        .andExpect(jsonPath("$.name").value(firstRequest.name()))
         .andExpect(jsonPath("$.category").value("Comic"))
         .andExpect(jsonPath("$.price").value("10.99"))
-        .andExpect(jsonPath("$.stock").value("17"))
+        .andExpect(jsonPath("$.stock").value("100"))
         .andExpect(jsonPath("$.createdAt").isNotEmpty())
         .andExpect(jsonPath("$.lastModifiedAt").isNotEmpty())
         .andExpect(jsonPath("$.lastFinalizedAt").isNotEmpty());
@@ -144,15 +141,13 @@ public class ProductsControllerIT {
   @Order(5)
   @SneakyThrows
   void shouldRunPipelineSecondTime() {
-    var productRequest = new ProductRequest(testProductId, secondRunName);
-
     mockMvc.perform(post("/products")
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
                    "id":%s,
                    "name":"%s"
-                }""".formatted(productRequest.id(), productRequest.name())))
+                }""".formatted(secondRequest.id(), secondRequest.name())))
         .andExpect(status().isAccepted());
 
     await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
@@ -175,14 +170,15 @@ public class ProductsControllerIT {
   @Order(6)
   @SneakyThrows
   void shouldHaveFinalizedProductSecondTime() {
-    mockMvc.perform(get("/products/%s".formatted(testProductId)))
+    mockMvc.perform(get("/products/%s".formatted(secondRequest.id())))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id").value(testProductId))
-        .andExpect(jsonPath("$.name").value(secondRunName))
+        .andExpect(jsonPath("$.id").value(secondRequest.id()))
+        .andExpect(jsonPath("$.name").value(secondRequest.name()))
         .andExpect(jsonPath("$.category").value("Comic"))
         .andExpect(jsonPath("$.price").value("10.99"))
-        .andExpect(jsonPath("$.stock").value("17"))
+        .andExpect(jsonPath("$.stock").value("100"
+            + ""))
         .andExpect(jsonPath("$.createdAt").isNotEmpty())
         .andExpect(jsonPath("$.lastModifiedAt").isNotEmpty())
         .andExpect(jsonPath("$.lastFinalizedAt").isNotEmpty());
