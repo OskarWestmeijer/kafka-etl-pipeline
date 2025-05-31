@@ -56,3 +56,7 @@ curl -X GET localhost:9000/category?productId=1 -H "Content-Type: application/js
 - [Kafka UI](http://localhost:8081)
 - [Prometheus UI](http://localhost:9090)
 
+## Architecture
+
+![Alt c4-model system context diagram](docs/c4model/c4_container.svg)
+![Alt c4-model system context diagram](docs/c4model/c4_component.svg)

@@ -1,0 +1,52 @@
+@startuml C4_ETL_Components
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title C4Model Component Diagram for ETL-service
+
+' External actors and systems
+Person(user, "Product Manager")
+ContainerDb(postgres_db, "Database", "PostgreSQL")
+
+System_Ext(category_api, "Category-Api", "Provides category information")
+System_Ext(stock_api, "Stock-Api", "Provides stock information")
+System_Ext(price_api, "Price-Api", "Provides price information")
+
+' Kafka topics
+ContainerQueue(topic_received, "product-received", "Kafka Topic")
+ContainerQueue(topic_category, "product-with-category", "Kafka Topic")
+ContainerQueue(topic_stock, "product-with-stock", "Kafka Topic")
+ContainerQueue(topic_price, "product-with-price", "Kafka Topic")
+
+' ETL service and components
+Container_Boundary(etl_pipeline, "ETL-service") {
+    Component(receiver_step, "ProductReceiverStep", "Spring Component", "Receives and stores raw product")
+    Component(category_step, "CategoryEnrichmentStep", "Spring Component", "Adds category info")
+    Component(stock_step, "StockEnrichmentStep", "Spring Component", "Adds stock info")
+    Component(price_step, "PriceEnrichmentStep", "Spring Component", "Adds price info")
+    Component(finalizer_step, "ProductFinalizerStep", "Spring Component", "Final validation and DB save")
+}
+
+' Flow: Step-by-step
+Rel(user, receiver_step, "Sends product")
+Rel(receiver_step, topic_received, "Publishes")
+Rel(topic_received, category_step, "Consumed by")
+
+Rel(category_step, topic_category, "Publishes")
+Rel(topic_category, stock_step, "Consumed by")
+
+Rel(stock_step, topic_stock, "Publishes")
+Rel(topic_stock, price_step, "Consumed by")
+
+Rel(price_step, topic_price, "Publishes")
+Rel(topic_price, finalizer_step, "Consumed by")
+
+' API calls at steps
+Rel(category_step, category_api, "Calls")
+Rel(stock_step, stock_api, "Calls")
+Rel(price_step, price_api, "Calls")
+
+' DB interactions
+Rel(receiver_step, postgres_db, "Saves raw product")
+Rel(finalizer_step, postgres_db, "Saves final product")
+
+@enduml

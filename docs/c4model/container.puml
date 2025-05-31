@@ -1,0 +1,32 @@
+@startuml C4_Elements
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title C4Model Container Diagram for kafka-etl-pipeline
+
+' External actor
+Person(user, "Product Manager")
+
+' External systems
+System_Ext(category_api, "Category-Api", "Provides category information")
+System_Ext(stock_api, "Stock-Api", "Provides stock information")
+System_Ext(price_api, "Price-Api", "Provides price information")
+
+' System boundary for ETL pipeline
+System_Boundary(kafka_etl_pipeline_system, "kafka-etl-pipeline") {
+    Container(etl_pipeline, "ETL-service", "Spring Boot", "Consumes product events, enriches them with external data, and saves to DB / Kafka")
+    ContainerDb(postgres_db, "Database", "PostgreSQL", "Stores raw and enriched product data")
+    ContainerQueue(product_pipeline, "Product-pipeline", "Kafka", "Receives and distributes enriched product events")
+}
+
+' Relationships
+Rel(user, etl_pipeline, "Sends product", "HTTP")
+
+Rel(etl_pipeline, category_api, "Fetches category data", "HTTP")
+Rel(etl_pipeline, stock_api, "Fetches stock data", "HTTP")
+Rel(etl_pipeline, price_api, "Fetches price data", "HTTP")
+
+Rel(etl_pipeline, postgres_db, "Stores product data", "JDBC/HTTP")
+Rel(etl_pipeline, product_pipeline, "Publishes enriched product", "Kafka")
+
+@enduml
