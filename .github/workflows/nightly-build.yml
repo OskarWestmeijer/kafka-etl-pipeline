@@ -9,7 +9,7 @@ jobs:
   backend-build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/backend-build-and-test
         with:
           code-cov: ${{ secrets.CODECOV_TOKEN }}
