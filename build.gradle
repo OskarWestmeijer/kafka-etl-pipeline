@@ -29,7 +29,7 @@ dependencies {
     implementation 'io.cloudevents:cloudevents-json-jackson:4.0.1'
 
     implementation 'io.micrometer:micrometer-registry-prometheus'
-    implementation 'org.apache.commons:commons-lang3:3.18.0'
+    implementation 'org.apache.commons:commons-lang3:3.19.0'
     implementation 'com.google.guava:guava:33.5.0-jre'
 
     implementation 'org.postgresql:postgresql'
